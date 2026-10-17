@@ -1,0 +1,4318 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>SkillMatch - AI-Powered Recruitment Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Plus Jakarta Sans", "sans-serif"],
+            },
+            colors: {
+              navy: {
+                800: "#0b1329",
+                900: "#070d1b",
+                950: "#030712",
+              },
+              brand: {
+                blue: "#1552b5",
+                hover: "#114498",
+                orange: "#f59e0b",
+                accent: "#3b82f6",
+              },
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        font-family: "Plus Jakarta Sans", sans-serif;
+      }
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 9999px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+
+      /* ---------- Mobile tweaks ---------- */
+      .safe-bottom {
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      .safe-top {
+        padding-top: env(safe-area-inset-top, 0px);
+      }
+      @media (max-width: 767px) {
+        /* compact login: show just the brand strip, then the form */
+        #auth-stats-seeker,
+        #auth-stats-recruiter,
+        #auth-footnote {
+          display: none !important;
+        }
+        main {
+          overflow-x: hidden;
+        }
+        input,
+        select,
+        textarea {
+          font-size: 16px !important;
+        } /* stops iOS zoom on focus */
+      }
+      .mnav-item {
+        -webkit-tap-highlight-color: transparent;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-brand-blue selection:text-white"
+  >
+    <script>
+      window.appState = {
+        currentView: "login", // 'login', 'dashboard', 'browse', 'applications', 'profile', 'settings', 'apply', 'recruiter-dashboard', 'recruiter-jobs', 'recruiter-candidates', 'recruiter-aiscreening', 'recruiter-analytics', 'recruiter-settings', 'recruiter-uploadcv', 'recruiter-assessment'
+        userType: "jobseeker",
+        activeJobTab: "all",
+        selectedJobForApply: null,
+        assessmentQuestionIndex: 0,
+        activeAppTab: "all",
+
+        // Mock Data
+        jobs: [
+          {
+            id: 1,
+            title: "Senior Frontend Engineer",
+            company: "TechCorp Ghana Ltd",
+            location: "Accra, Ghana • Remote",
+            salary: "₦200k-280k/month",
+            match: 92,
+            icon: "code",
+            iconBg: "bg-blue-100 text-blue-600",
+            isPremium: false,
+            isLocked: false,
+          },
+          {
+            id: 2,
+            title: "Junior Software Developer",
+            company: "TechHub Accra",
+            location: "Accra, Ghana • Remote",
+            salary: "₦140k-180k/month",
+            match: 89,
+            icon: "code",
+            iconBg: "bg-indigo-100 text-indigo-600",
+            isPremium: false,
+            isLocked: false,
+          },
+          {
+            id: 3,
+            title: "Frontend Engineer",
+            company: "StartupLabs",
+            location: "Lagos, Nigeria • On-site",
+            salary: "₦180k/month",
+            match: 87,
+            icon: "layer-group",
+            iconBg: "bg-purple-100 text-purple-600",
+            isPremium: false,
+            isLocked: false,
+          },
+          {
+            id: 4,
+            title: "Full Stack Developer",
+            company: "DevCraft Solutions",
+            location: "Remote • Hybrid",
+            salary: "$2,500/month",
+            match: 84,
+            icon: "circle-nodes",
+            iconBg: "bg-emerald-100 text-emerald-600",
+            isPremium: false,
+            isLocked: false,
+          },
+          {
+            id: 5,
+            title: "React Developer",
+            company: "WebWorks Nigeria",
+            location: "Abuja, Nigeria • Remote",
+            salary: "₦140k/month",
+            match: 81,
+            icon: "bolt",
+            iconBg: "bg-amber-100 text-amber-600",
+            isPremium: false,
+            isLocked: false,
+          },
+          {
+            id: 6,
+            title: "Data Scientist",
+            company: "DataFlow Analytics",
+            location: "Lagos, Nigeria • Hybrid",
+            salary: "₦250k-350k/month",
+            match: 88,
+            icon: "waves",
+            iconBg: "bg-teal-100 text-teal-600",
+            isPremium: true,
+            isLocked: true,
+          },
+          {
+            id: 7,
+            title: "Product Manager",
+            company: "StartupHub Lagos",
+            location: "Lagos, Nigeria • On-site",
+            salary: "₦300k-450k/month",
+            match: 82,
+            icon: "bullseye",
+            iconBg: "bg-rose-100 text-rose-600",
+            isPremium: true,
+            isLocked: true,
+          },
+        ],
+
+        applications: [
+          {
+            id: 101,
+            title: "Senior Frontend Engineer",
+            company: "TechCorp Ghana",
+            applied: "3 days ago",
+            status: "Shortlisted",
+            actionText: "View profile",
+            actionType: "view",
+            icon: "code",
+            iconBg: "bg-blue-100 text-blue-600",
+          },
+          {
+            id: 102,
+            title: "React Developer",
+            company: "WebWorks Nigeria",
+            applied: "3 days ago",
+            status: "Shortlisted",
+            actionText: "View profile",
+            actionType: "view",
+            icon: "bolt",
+            iconBg: "bg-purple-100 text-purple-600",
+          },
+          {
+            id: 103,
+            title: "Frontend Engineer",
+            company: "StartupLabs",
+            applied: "4 days ago",
+            status: "Assessment sent",
+            actionText: "Take assessment",
+            actionType: "assessment",
+            icon: "square-check",
+            iconBg: "bg-amber-100 text-amber-600",
+          },
+          {
+            id: 104,
+            title: "Full Stack Developer",
+            company: "BuildIt Solutions",
+            applied: "5 days ago",
+            status: "Under review",
+            actionText: "Check status",
+            actionType: "status",
+            icon: "circle-nodes",
+            iconBg: "bg-emerald-100 text-emerald-600",
+          },
+          {
+            id: 105,
+            title: "Junior Developer",
+            company: "CodeAcademy Ghana",
+            applied: "6 days ago",
+            status: "Under review",
+            actionText: "Check status",
+            actionType: "status",
+            icon: "laptop-code",
+            iconBg: "bg-cyan-100 text-cyan-600",
+          },
+          {
+            id: 106,
+            title: "Software Engineer",
+            company: "DevHub Lagos",
+            applied: "1 week ago",
+            status: "CV reviewed",
+            actionText: "Waiting",
+            actionType: "waiting",
+            icon: "bolt",
+            iconBg: "bg-blue-100 text-blue-600",
+          },
+        ],
+      };
+
+      function switchView(viewName, extraData = null) {
+        window.appState.currentView = viewName;
+        if (extraData) window.appState.selectedJobForApply = extraData;
+
+        // Hide main auth container and layouts
+        document.getElementById("auth-container").classList.add("hidden");
+        document.getElementById("portal-layout").classList.add("hidden");
+        document.getElementById("recruiter-layout").classList.add("hidden");
+
+        if (viewName === "login") {
+          document.getElementById("auth-container").classList.remove("hidden");
+        } else if (viewName.startsWith("recruiter-")) {
+          document
+            .getElementById("recruiter-layout")
+            .classList.remove("hidden");
+
+          // Hide all recruiter subviews
+          document
+            .querySelectorAll(".recruiter-view")
+            .forEach((el) => el.classList.add("hidden"));
+
+          // Show target view
+          const activeViewEl = document.getElementById("view-" + viewName);
+          if (activeViewEl) activeViewEl.classList.remove("hidden");
+
+          updateRecruiterNavStyles(viewName);
+          updateMobileNav(viewName);
+        } else {
+          document.getElementById("portal-layout").classList.remove("hidden");
+
+          // Hide all seeker subviews
+          document
+            .querySelectorAll(".portal-view")
+            .forEach((el) => el.classList.add("hidden"));
+
+          // Show target view
+          const activeViewEl = document.getElementById("view-" + viewName);
+          if (activeViewEl) activeViewEl.classList.remove("hidden");
+
+          updateNavStyles(viewName);
+          updateMobileNav(viewName);
+        }
+        window.scrollTo(0, 0);
+      }
+
+      function updateMobileNav(viewName) {
+        const portal = viewName.startsWith("recruiter-")
+          ? "recruiter"
+          : "seeker";
+        const alias = {
+          apply: "browse",
+          "recruiter-uploadcv": "recruiter-candidates",
+          "recruiter-assessment": "recruiter-aiscreening",
+        };
+        const target = alias[viewName] || viewName;
+        document
+          .querySelectorAll('.mnav-item[data-portal="' + portal + '"]')
+          .forEach((btn) => {
+            const on = btn.getAttribute("data-view") === target;
+            btn.classList.toggle("text-white", on);
+            btn.classList.toggle("text-slate-400", !on);
+            const ico = btn.querySelector(".mnav-ico");
+            if (ico) {
+              ico.classList.toggle("bg-brand-blue", on);
+              ico.classList.toggle("shadow-sm", on);
+            }
+          });
+      }
+
+      function updateNavStyles(viewName) {
+        document.querySelectorAll(".nav-item").forEach((btn) => {
+          const navTarget = btn.getAttribute("data-view");
+          if (navTarget === viewName) {
+            btn.className =
+              "nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium bg-slate-800 text-white shadow-sm transition-all";
+          } else {
+            btn.className =
+              "nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all";
+          }
+        });
+      }
+
+      function updateRecruiterNavStyles(viewName) {
+        document.querySelectorAll(".recruiter-nav-item").forEach((btn) => {
+          const navTarget = btn.getAttribute("data-view");
+          if (navTarget === viewName) {
+            btn.className =
+              "recruiter-nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium bg-slate-800 text-white shadow-sm transition-all";
+          } else {
+            btn.className =
+              "recruiter-nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all";
+          }
+        });
+      }
+
+      function triggerToast(msg) {
+        const toast = document.getElementById("toast");
+        document.getElementById("toast-msg").innerText = msg;
+        toast.classList.remove("translate-y-20", "opacity-0");
+        setTimeout(() => {
+          toast.classList.add("translate-y-20", "opacity-0");
+        }, 3000);
+      }
+
+      function openModal(id) {
+        document.getElementById(id).classList.remove("hidden");
+      }
+
+      function closeModal(id) {
+        document.getElementById(id).classList.add("hidden");
+      }
+
+      function selectQuestion(index) {
+        window.appState.assessmentQuestionIndex = index;
+        document.querySelectorAll(".q-pill").forEach((btn, idx) => {
+          if (idx === index) {
+            btn.className =
+              "q-pill w-9 h-9 rounded-xl font-bold text-xs bg-brand-blue text-white shadow-sm flex items-center justify-center transition-all";
+          } else {
+            btn.className =
+              "q-pill w-9 h-9 rounded-xl font-semibold text-xs bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center transition-all";
+          }
+        });
+        document.getElementById("q-num-label").innerText =
+          `Question ${index + 1} of 10`;
+      }
+    </script>
+
+    <!-- AUTH CONTAINER (Job Seeker / Recruiter Toggle) -->
+    <div
+      id="auth-container"
+      class="min-h-screen flex flex-col md:flex-row w-full bg-white"
+    >
+      <!-- Left Side (Branding & Key Features Dynamic content) -->
+      <div
+        class="w-full md:w-1/2 bg-navy-900 text-white px-6 py-6 md:p-16 flex flex-col justify-between relative overflow-hidden"
+      >
+        <div class="space-y-4 md:space-y-12 relative z-10">
+          <div class="space-y-1">
+            <div
+              class="flex items-center space-x-1 text-3xl font-black tracking-tight"
+            >
+              <span class="text-white">Skill</span
+              ><span class="text-brand-orange">Match</span>
+            </div>
+            <p class="text-slate-400 font-medium text-sm">
+              AI-Powered Recruitment Platform
+            </p>
+          </div>
+
+          <div id="auth-stats-seeker" class="space-y-8 pt-4">
+            <div class="flex items-center space-x-6">
+              <span
+                class="text-brand-orange font-extrabold text-3xl md:text-4xl min-w-[120px]"
+                >1,500+</span
+              >
+              <span class="text-slate-300 font-medium text-base md:text-lg"
+                >Active job opportunities</span
+              >
+            </div>
+            <div class="flex items-center space-x-6">
+              <span
+                class="text-brand-orange font-extrabold text-3xl md:text-4xl min-w-[120px]"
+                >Fair</span
+              >
+              <span class="text-slate-300 font-medium text-base md:text-lg"
+                >AI-powered skill assessment</span
+              >
+            </div>
+            <div class="flex items-center space-x-6">
+              <span
+                class="text-brand-orange font-extrabold text-3xl md:text-4xl min-w-[120px]"
+                >Fast</span
+              >
+              <span class="text-slate-300 font-medium text-base md:text-lg"
+                >Get shortlisted in 24–72 hours</span
+              >
+            </div>
+          </div>
+
+          <div id="auth-stats-recruiter" class="space-y-8 pt-4 hidden">
+            <div class="flex items-center space-x-6">
+              <span
+                class="text-brand-orange font-extrabold text-3xl md:text-4xl min-w-[120px]"
+                >50%</span
+              >
+              <span class="text-slate-300 font-medium text-base md:text-lg"
+                >Reduction in screening time</span
+              >
+            </div>
+            <div class="flex items-center space-x-6">
+              <span
+                class="text-brand-orange font-extrabold text-3xl md:text-4xl min-w-[120px]"
+                >80%+</span
+              >
+              <span class="text-slate-300 font-medium text-base md:text-lg"
+                >Shortlisted candidates are job-relevant</span
+              >
+            </div>
+            <div class="flex items-center space-x-6">
+              <span
+                class="text-brand-orange font-extrabold text-3xl md:text-4xl min-w-[120px]"
+                >1,000</span
+              >
+              <span class="text-slate-300 font-medium text-base md:text-lg"
+                >Recruiters onboarded within 3 months</span
+              >
+            </div>
+          </div>
+
+          <p id="auth-footnote" class="text-slate-500 text-xs md:text-sm pt-8">
+            Only verified companies can access this platform
+          </p>
+        </div>
+      </div>
+
+      <!-- Right Side (Sign In Form) -->
+      <div
+        class="w-full md:w-1/2 px-6 py-8 md:p-16 flex flex-col justify-center items-center bg-white flex-1"
+      >
+        <div class="w-full max-w-md space-y-6">
+          <div class="space-y-2">
+            <h1
+              class="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight"
+            >
+              Welcome back
+            </h1>
+            <p class="text-slate-500 text-sm">
+              Sign in to your SkillMatch account
+            </p>
+          </div>
+
+          <div class="space-y-2">
+            <label
+              class="text-[11px] font-bold tracking-wider text-slate-400 uppercase"
+              >I AM A</label
+            >
+            <div
+              class="flex p-1 bg-slate-100 rounded-xl border border-slate-200"
+            >
+              <button
+                id="tab-jobseeker"
+                onclick="toggleAuthRole('jobseeker')"
+                class="flex-1 py-2.5 rounded-lg text-sm font-semibold bg-brand-blue text-white shadow-sm transition-all"
+              >
+                Job Seeker
+              </button>
+              <button
+                id="tab-recruiter"
+                onclick="toggleAuthRole('recruiter')"
+                class="flex-1 py-2.5 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 transition-all"
+              >
+                Recruiter
+              </button>
+            </div>
+          </div>
+
+          <form
+            onsubmit="
+              event.preventDefault();
+              handleSignIn();
+            "
+            class="space-y-4 pt-2"
+          >
+            <div>
+              <input
+                type="email"
+                id="email-input"
+                required
+                value="adewale.stephen@email.com"
+                class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-blue/30 focus:border-brand-blue transition text-sm"
+              />
+            </div>
+            <div>
+              <input
+                type="password"
+                required
+                value="••••••••••••"
+                class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-blue/30 focus:border-brand-blue transition text-sm"
+              />
+            </div>
+
+            <div class="flex justify-end">
+              <a
+                href="#"
+                onclick="
+                  triggerToast('Reset link sent to your email');
+                  return false;
+                "
+                class="text-sm font-semibold text-brand-blue hover:underline"
+                >Forgot password?</a
+              >
+            </div>
+
+            <button
+              type="submit"
+              class="w-full bg-brand-blue hover:bg-brand-hover text-white font-semibold py-3.5 rounded-xl shadow-md transition duration-200 flex items-center justify-center space-x-2 text-sm"
+            >
+              <span>Sign in to SkillMatch</span>
+              <i class="fa-solid font-bold fa-arrow-right text-xs"></i>
+            </button>
+          </form>
+
+          <div class="text-center pt-2">
+            <p class="text-slate-500 text-xs md:text-sm">
+              Don't have an account?
+              <a
+                href="#"
+                onclick="
+                  triggerToast('Registration page');
+                  return false;
+                "
+                class="text-brand-blue font-semibold hover:underline"
+                >Create account</a
+              >
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECRUITER PORTAL LAYOUT -->
+    <div
+      id="recruiter-layout"
+      class="hidden min-h-screen flex flex-col md:flex-row w-full bg-slate-50"
+    >
+      <!-- Mobile top bar -->
+      <header
+        class="md:hidden sticky top-0 z-30 bg-navy-900 border-b border-slate-800 safe-top"
+      >
+        <div class="flex items-center justify-between px-4 h-14">
+          <div
+            class="cursor-pointer"
+            onclick="switchView('recruiter-dashboard')"
+          >
+            <div
+              class="flex items-center space-x-1 text-xl font-black tracking-tight leading-none"
+            >
+              <span class="text-white">Skill</span
+              ><span class="text-brand-orange">Match</span>
+            </div>
+            <p class="text-slate-400 text-[10px] font-medium mt-0.5">
+              Recruitment Platform
+            </p>
+          </div>
+          <div class="flex items-center space-x-1">
+            <button
+              onclick="switchView('recruiter-settings')"
+              data-view="recruiter-settings"
+              data-portal="recruiter"
+              aria-label="Settings"
+              class="mnav-item w-10 h-10 rounded-xl text-slate-400 flex items-center justify-center transition"
+            >
+              <i class="fa-solid fa-gear"></i>
+            </button>
+            <button
+              onclick="switchView('login')"
+              aria-label="Sign out"
+              class="w-10 h-10 rounded-xl text-slate-400 hover:text-red-400 hover:bg-slate-800/60 flex items-center justify-center transition"
+            >
+              <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            </button>
+          </div>
+        </div>
+      </header>
+      <!-- Recruiter Sidebar Navigation -->
+      <aside
+        class="w-full md:w-64 bg-navy-900 text-slate-300 hidden md:flex flex-col justify-between shrink-0 min-h-screen border-r border-slate-800"
+      >
+        <div class="p-6 space-y-8">
+          <div class="space-y-1">
+            <div
+              class="flex items-center space-x-1 text-2xl font-black tracking-tight cursor-pointer"
+              onclick="switchView('recruiter-dashboard')"
+            >
+              <span class="text-white">Skill</span
+              ><span class="text-brand-orange">Match</span>
+            </div>
+            <p class="text-slate-400 text-xs font-medium">
+              Recruitment Platform
+            </p>
+          </div>
+
+          <nav class="space-y-6">
+            <div>
+              <p
+                class="text-[11px] font-bold tracking-wider text-slate-500 uppercase px-4 mb-3"
+              >
+                MAIN
+              </p>
+              <div class="space-y-1">
+                <button
+                  onclick="switchView('recruiter-dashboard')"
+                  data-view="recruiter-dashboard"
+                  class="recruiter-nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium bg-slate-800 text-white shadow-sm transition-all"
+                >
+                  <i class="fa-solid fa-border-all w-5"></i>
+                  <span class="text-sm">Dashboard</span>
+                </button>
+                <button
+                  onclick="switchView('recruiter-jobs')"
+                  data-view="recruiter-jobs"
+                  class="recruiter-nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all justify-between"
+                >
+                  <div class="flex items-center space-x-3">
+                    <i class="fa-solid fa-layer-group w-5"></i>
+                    <span class="text-sm">Job listings</span>
+                  </div>
+                  <span
+                    class="bg-brand-blue text-white text-[11px] font-bold px-2 py-0.5 rounded-full"
+                    >4</span
+                  >
+                </button>
+                <button
+                  onclick="switchView('recruiter-candidates')"
+                  data-view="recruiter-candidates"
+                  class="recruiter-nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all"
+                >
+                  <i class="fa-regular fa-circle-user w-5"></i>
+                  <span class="text-sm">Candidates</span>
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <p
+                class="text-[11px] font-bold tracking-wider text-slate-500 uppercase px-4 mb-3"
+              >
+                TOOLS
+              </p>
+              <div class="space-y-1">
+                <button
+                  onclick="switchView('recruiter-aiscreening')"
+                  data-view="recruiter-aiscreening"
+                  class="recruiter-nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all"
+                >
+                  <i class="fa-solid fa-sparkles w-5 text-brand-blue"></i>
+                  <span class="text-sm">AI Screening</span>
+                </button>
+                <button
+                  onclick="switchView('recruiter-analytics')"
+                  data-view="recruiter-analytics"
+                  class="recruiter-nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all"
+                >
+                  <i class="fa-solid fa-chart-simple w-5"></i>
+                  <span class="text-sm">Analytics</span>
+                </button>
+                <button
+                  onclick="switchView('recruiter-settings')"
+                  data-view="recruiter-settings"
+                  class="recruiter-nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all"
+                >
+                  <i class="fa-solid fa-gear w-5"></i>
+                  <span class="text-sm">Settings</span>
+                </button>
+              </div>
+            </div>
+          </nav>
+        </div>
+
+        <div class="p-6 space-y-4">
+          <button
+            onclick="switchView('login')"
+            class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl font-medium text-slate-400 hover:text-red-400 hover:bg-slate-800/50 transition text-sm"
+          >
+            <i class="fa-solid fa-arrow-right-from-bracket w-5"></i>
+            <span>Sign Out</span>
+          </button>
+          <div class="pt-2 border-t border-slate-800/80">
+            <button
+              class="bg-slate-800/70 hover:bg-slate-800 text-[11px] text-slate-400 px-3 py-1.5 rounded-lg border border-slate-700/40 w-full text-left transition"
+            >
+              Manage cookies or opt out
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Recruiter Content Area -->
+      <main
+        class="flex-1 min-w-0 overflow-y-auto custom-scrollbar p-4 sm:p-6 md:p-10 pb-28 md:pb-10"
+      >
+        <!-- RECRUITER VIEW 1: DASHBOARD -->
+        <div
+          id="view-recruiter-dashboard"
+          class="recruiter-view space-y-8 max-w-6xl mx-auto"
+        >
+          <!-- Header with Action Buttons -->
+          <div
+            class="flex flex-col md:flex-row md:items-center justify-between gap-4"
+          >
+            <div>
+              <h1 class="text-2xl font-bold text-slate-900">Dashboard</h1>
+              <p class="text-slate-500 text-xs sm:text-sm mt-0.5">
+                Friday, 6 June 2026
+              </p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button
+                onclick="switchView('recruiter-uploadcv')"
+                class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold px-4 py-2.5 rounded-xl transition shadow-sm"
+              >
+                Upload CVs
+              </button>
+              <button
+                onclick="openModal('modal-new-job')"
+                class="bg-brand-blue hover:bg-brand-hover text-white font-semibold px-4 py-2.5 rounded-xl shadow-sm transition text-xs flex items-center space-x-2"
+              >
+                <i class="fa-solid fa-plus"></i>
+                <span>New job</span>
+              </button>
+              <button
+                onclick="switchView('recruiter-assessment')"
+                class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold px-3.5 py-2.5 rounded-xl transition shadow-sm flex items-center space-x-1.5"
+              >
+                <i class="fa-solid fa-play text-slate-500 text-[10px]"></i>
+                <span>Assessment</span>
+              </button>
+              <button
+                onclick="openModal('modal-pricing')"
+                class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold px-3.5 py-2.5 rounded-xl transition shadow-sm flex items-center space-x-1.5"
+              >
+                <span class="text-xs">💳</span>
+                <span>Pricing</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Stats Cards Row -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm border-t-4 border-t-blue-500"
+            >
+              <p class="text-slate-500 text-xs font-semibold">Active jobs</p>
+              <h2 class="text-3xl font-extrabold text-slate-900 mt-2">4</h2>
+              <span
+                class="inline-block text-xs text-emerald-600 font-semibold mt-2"
+                >↑ 2 this week</span
+              >
+            </div>
+
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm border-t-4 border-t-purple-500"
+            >
+              <p class="text-slate-500 text-xs font-semibold">
+                Total applicants
+              </p>
+              <h2 class="text-3xl font-extrabold text-slate-900 mt-2">284</h2>
+              <span
+                class="inline-block text-xs text-emerald-600 font-semibold mt-2"
+                >↑ 38 today</span
+              >
+            </div>
+
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm border-t-4 border-t-emerald-500"
+            >
+              <p class="text-slate-500 text-xs font-semibold">Shortlisted</p>
+              <h2 class="text-3xl font-extrabold text-slate-900 mt-2">31</h2>
+              <span
+                class="inline-block text-xs text-emerald-600 font-semibold mt-2"
+                >11% pass rate</span
+              >
+            </div>
+
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm border-t-4 border-t-amber-500"
+            >
+              <p class="text-slate-500 text-xs font-semibold">
+                Avg. screening time
+              </p>
+              <h2 class="text-3xl font-extrabold text-slate-900 mt-2">
+                11 <span class="text-sm font-semibold">hrs</span>
+              </h2>
+              <span
+                class="inline-block text-xs text-emerald-600 font-semibold mt-2"
+                >↓ 52% vs manual</span
+              >
+            </div>
+          </div>
+
+          <!-- Active Job Listings -->
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <h2 class="text-lg font-bold text-slate-900">
+                Active job listings
+              </h2>
+              <button
+                onclick="openModal('modal-new-job')"
+                class="text-xs font-semibold text-brand-blue hover:underline"
+              >
+                + New job
+              </button>
+            </div>
+
+            <div class="space-y-3">
+              <div
+                onclick="switchView('recruiter-aiscreening')"
+                class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-100 hover:border-slate-300 transition-all shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 cursor-pointer"
+              >
+                <div class="flex items-center space-x-4">
+                  <div
+                    class="w-12 h-12 rounded-2xl bg-blue-50 text-brand-blue flex items-center justify-center shrink-0 font-mono font-bold text-lg"
+                  >
+                    { }
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-slate-900 text-base">
+                      Senior Frontend Engineer
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">
+                      Engineering • Remote • Posted 3 days ago
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="flex items-center space-x-4 w-full sm:w-auto justify-between sm:justify-end"
+                >
+                  <span
+                    class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full"
+                    >Active</span
+                  >
+                  <div class="text-right">
+                    <span class="text-lg font-extrabold text-slate-900"
+                      >87</span
+                    >
+                    <p class="text-[11px] text-slate-400 font-medium">
+                      applicants
+                    </p>
+                  </div>
+                  <i
+                    class="fa-solid fa-chevron-right text-slate-300 text-xs"
+                  ></i>
+                </div>
+              </div>
+
+              <div
+                onclick="switchView('recruiter-aiscreening')"
+                class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-100 hover:border-slate-300 transition-all shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 cursor-pointer"
+              >
+                <div class="flex items-center space-x-4">
+                  <div
+                    class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 text-lg"
+                  >
+                    <i class="fa-solid fa-water"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-slate-900 text-base">
+                      Data Scientist
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">
+                      Analytics • Hybrid • Posted 6 days ago
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="flex items-center space-x-4 w-full sm:w-auto justify-between sm:justify-end"
+                >
+                  <span
+                    class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full"
+                    >Screening</span
+                  >
+                  <div class="text-right">
+                    <span class="text-lg font-extrabold text-slate-900"
+                      >112</span
+                    >
+                    <p class="text-[11px] text-slate-400 font-medium">
+                      applicants
+                    </p>
+                  </div>
+                  <i
+                    class="fa-solid fa-chevron-right text-slate-300 text-xs"
+                  ></i>
+                </div>
+              </div>
+
+              <div
+                onclick="switchView('recruiter-aiscreening')"
+                class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-100 hover:border-slate-300 transition-all shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 cursor-pointer"
+              >
+                <div class="flex items-center space-x-4">
+                  <div
+                    class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 text-lg"
+                  >
+                    <i class="fa-solid fa-circle-dot"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-slate-900 text-base">
+                      Product Marketing Manager
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">
+                      Marketing • On-site • Posted 9 days ago
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="flex items-center space-x-4 w-full sm:w-auto justify-between sm:justify-end"
+                >
+                  <span
+                    class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full"
+                    >Assessment</span
+                  >
+                  <div class="text-right">
+                    <span class="text-lg font-extrabold text-slate-900"
+                      >54</span
+                    >
+                    <p class="text-[11px] text-slate-400 font-medium">
+                      applicants
+                    </p>
+                  </div>
+                  <i
+                    class="fa-solid fa-chevron-right text-slate-300 text-xs"
+                  ></i>
+                </div>
+              </div>
+
+              <div
+                onclick="switchView('recruiter-aiscreening')"
+                class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-100 hover:border-slate-300 transition-all shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 cursor-pointer"
+              >
+                <div class="flex items-center space-x-4">
+                  <div
+                    class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center shrink-0 text-lg"
+                  >
+                    <i class="fa-solid fa-gear"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-slate-900 text-base">
+                      HR Business Partner
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">
+                      HR • Remote • Posted 12 days ago
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="flex items-center space-x-4 w-full sm:w-auto justify-between sm:justify-end"
+                >
+                  <span
+                    class="bg-purple-100 text-purple-800 text-xs font-bold px-3 py-1 rounded-full"
+                    >Shortlisting</span
+                  >
+                  <div class="text-right">
+                    <span class="text-lg font-extrabold text-slate-900"
+                      >31</span
+                    >
+                    <p class="text-[11px] text-slate-400 font-medium">
+                      applicants
+                    </p>
+                  </div>
+                  <i
+                    class="fa-solid fa-chevron-right text-slate-300 text-xs"
+                  ></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RECRUITER VIEW: UPLOAD CVS (Matching Screenshot 1) -->
+        <div
+          id="view-recruiter-uploadcv"
+          class="recruiter-view hidden space-y-6 max-w-6xl mx-auto"
+        >
+          <div
+            class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200"
+          >
+            <div>
+              <h1 class="text-2xl font-extrabold text-slate-900">
+                CV upload — Senior Frontend Engineer
+              </h1>
+              <p class="text-slate-500 text-xs sm:text-sm mt-0.5">
+                Applications stored and processed automatically
+              </p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button
+                onclick="switchView('recruiter-aiscreening')"
+                class="bg-brand-blue hover:bg-brand-hover text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-sm transition flex items-center space-x-1.5"
+              >
+                <i class="fa-solid fa-sparkles text-xs"></i>
+                <span>Start AI screening</span>
+              </button>
+              <button
+                onclick="switchView('recruiter-assessment')"
+                class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold px-3 py-2.5 rounded-xl transition shadow-sm flex items-center space-x-1.5"
+              >
+                <i class="fa-solid fa-play text-slate-400 text-[10px]"></i>
+                <span>Assessment</span>
+              </button>
+              <button
+                onclick="openModal('modal-pricing')"
+                class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold px-3 py-2.5 rounded-xl transition shadow-sm flex items-center space-x-1.5"
+              >
+                <span class="text-xs">💳</span>
+                <span>Pricing</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Drag & Drop Zone -->
+          <div
+            class="bg-slate-50/50 rounded-2xl border-2 border-dashed border-slate-300 p-10 flex flex-col items-center justify-center text-center space-y-3 hover:bg-slate-100/50 transition cursor-pointer"
+            onclick="triggerToast('Opening file selector...')"
+          >
+            <div
+              class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400"
+            >
+              <i class="fa-solid fa-arrow-up text-lg"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-slate-900 text-base">
+                Drag & drop CVs here
+              </h3>
+              <p class="text-xs text-slate-500 mt-1">
+                Supports PDF, DOCX — up to 50 files at once
+              </p>
+            </div>
+            <button
+              type="button"
+              class="mt-2 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold text-xs px-5 py-2 rounded-xl shadow-sm"
+            >
+              Browse files
+            </button>
+          </div>
+
+          <!-- Uploaded CVs List -->
+          <div class="space-y-4 pt-2">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <h2 class="text-lg font-bold text-slate-900">Uploaded CVs</h2>
+                <span
+                  class="bg-blue-100 text-brand-blue text-xs font-extrabold px-3 py-0.5 rounded-full"
+                  >87 total</span
+                >
+              </div>
+              <span class="text-xs text-slate-400 font-medium"
+                >All queued for AI analysis</span
+              >
+            </div>
+
+            <div class="space-y-2.5">
+              <!-- Item 1 -->
+              <div
+                class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between"
+              >
+                <div class="flex items-center space-x-3">
+                  <div
+                    class="w-9 h-9 rounded-lg bg-slate-100 text-slate-400 flex items-center justify-center text-sm"
+                  >
+                    <i class="fa-regular fa-file-pdf"></i>
+                  </div>
+                  <div>
+                    <p class="font-bold text-slate-900 text-sm">
+                      kofi_asante_cv.pdf
+                    </p>
+                    <p class="text-[11px] text-slate-400">342 KB • 2 min ago</p>
+                  </div>
+                </div>
+                <span
+                  class="bg-emerald-100 text-emerald-800 text-xs font-semibold px-3 py-1 rounded-full flex items-center space-x-1"
+                >
+                  <span>✓ Analysed</span>
+                </span>
+              </div>
+
+              <!-- Item 2 -->
+              <div
+                class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between"
+              >
+                <div class="flex items-center space-x-3">
+                  <div
+                    class="w-9 h-9 rounded-lg bg-slate-100 text-slate-400 flex items-center justify-center text-sm"
+                  >
+                    <i class="fa-regular fa-file-pdf"></i>
+                  </div>
+                  <div>
+                    <p class="font-bold text-slate-900 text-sm">
+                      sara_osei_resume.pdf
+                    </p>
+                    <p class="text-[11px] text-slate-400">218 KB • 4 min ago</p>
+                  </div>
+                </div>
+                <span
+                  class="bg-emerald-100 text-emerald-800 text-xs font-semibold px-3 py-1 rounded-full flex items-center space-x-1"
+                >
+                  <span>✓ Analysed</span>
+                </span>
+              </div>
+
+              <!-- Item 3 -->
+              <div
+                class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between"
+              >
+                <div class="flex items-center space-x-3">
+                  <div
+                    class="w-9 h-9 rounded-lg bg-slate-100 text-slate-400 flex items-center justify-center text-sm"
+                  >
+                    <i class="fa-regular fa-file-pdf"></i>
+                  </div>
+                  <div>
+                    <p class="font-bold text-slate-900 text-sm">
+                      james_addo_frontend.pdf
+                    </p>
+                    <p class="text-[11px] text-slate-400">487 KB • 4 min ago</p>
+                  </div>
+                </div>
+                <span
+                  class="bg-amber-100 text-amber-800 text-xs font-semibold px-3.5 py-1 rounded-full"
+                >
+                  Processing...
+                </span>
+              </div>
+
+              <!-- Item 4 -->
+              <div
+                class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between"
+              >
+                <div class="flex items-center space-x-3">
+                  <div
+                    class="w-9 h-9 rounded-lg bg-slate-100 text-slate-400 flex items-center justify-center text-sm"
+                  >
+                    <i class="fa-regular fa-file-pdf"></i>
+                  </div>
+                  <div>
+                    <p class="font-bold text-slate-900 text-sm">
+                      abena_quaye_portfolio.pdf
+                    </p>
+                    <p class="text-[11px] text-slate-400">512 KB • 5 min ago</p>
+                  </div>
+                </div>
+                <span
+                  class="bg-slate-100 text-slate-600 text-xs font-semibold px-3.5 py-1 rounded-full"
+                >
+                  Queued
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RECRUITER VIEW: ASSESSMENT TEST (Matching Screenshots 3 & 6) -->
+        <div
+          id="view-recruiter-assessment"
+          class="recruiter-view hidden space-y-6 max-w-5xl mx-auto"
+        >
+          <!-- TOP HEADER BANNER: Return to platform (Pic 6) -->
+          <div
+            class="bg-slate-900 text-white rounded-2xl p-4 sm:p-5 flex items-center justify-between shadow-md"
+          >
+            <div class="flex items-center space-x-3">
+              <div
+                class="w-10 h-10 rounded-xl bg-brand-blue flex items-center justify-center font-extrabold text-white text-lg"
+              >
+                S
+              </div>
+              <div>
+                <p class="text-xs text-slate-400 font-medium">
+                  SkillMatch Assessment Mode
+                </p>
+                <h2 class="font-bold text-white text-sm sm:text-base">
+                  Senior Frontend Engineer Test
+                </h2>
+              </div>
+            </div>
+            <button
+              onclick="switchView('recruiter-dashboard')"
+              class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center space-x-2"
+            >
+              <i class="fa-solid fa-arrow-left text-xs"></i>
+              <span>Return to platform</span>
+            </button>
+          </div>
+
+          <!-- Test Card Header -->
+          <div
+            class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-6"
+          >
+            <div
+              class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100"
+            >
+              <div>
+                <span
+                  class="bg-blue-50 text-brand-blue text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider"
+                  >Frontend Development</span
+                >
+                <h1 class="text-2xl font-bold text-slate-900 mt-2">
+                  Technical Skill Evaluation (10 Questions)
+                </h1>
+                <p class="text-xs text-slate-500 mt-1">
+                  Timed test • 20 minutes remaining
+                </p>
+              </div>
+              <div class="flex items-center space-x-2 self-start sm:self-auto">
+                <span
+                  class="bg-amber-50 text-amber-700 font-extrabold text-xs px-3 py-1.5 rounded-xl border border-amber-200 flex items-center space-x-1.5"
+                >
+                  <i class="fa-regular fa-clock"></i>
+                  <span>18:42</span>
+                </span>
+              </div>
+            </div>
+
+            <!-- Question Navigator 1 to 10 -->
+            <div class="space-y-2">
+              <p
+                class="text-xs font-bold text-slate-400 uppercase tracking-wider"
+              >
+                Question Navigator
+              </p>
+              <div class="flex flex-wrap items-center gap-2">
+                <button
+                  onclick="selectQuestion(0)"
+                  class="q-pill w-9 h-9 rounded-xl font-bold text-xs bg-brand-blue text-white shadow-sm flex items-center justify-center"
+                >
+                  1
+                </button>
+                <button
+                  onclick="selectQuestion(1)"
+                  class="q-pill w-9 h-9 rounded-xl font-semibold text-xs bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center"
+                >
+                  2
+                </button>
+                <button
+                  onclick="selectQuestion(2)"
+                  class="q-pill w-9 h-9 rounded-xl font-semibold text-xs bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center"
+                >
+                  3
+                </button>
+                <button
+                  onclick="selectQuestion(3)"
+                  class="q-pill w-9 h-9 rounded-xl font-semibold text-xs bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center"
+                >
+                  4
+                </button>
+                <button
+                  onclick="selectQuestion(4)"
+                  class="q-pill w-9 h-9 rounded-xl font-semibold text-xs bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center"
+                >
+                  5
+                </button>
+                <button
+                  onclick="selectQuestion(5)"
+                  class="q-pill w-9 h-9 rounded-xl font-semibold text-xs bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center"
+                >
+                  6
+                </button>
+                <button
+                  onclick="selectQuestion(6)"
+                  class="q-pill w-9 h-9 rounded-xl font-semibold text-xs bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center"
+                >
+                  7
+                </button>
+                <button
+                  onclick="selectQuestion(7)"
+                  class="q-pill w-9 h-9 rounded-xl font-semibold text-xs bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center"
+                >
+                  8
+                </button>
+                <button
+                  onclick="selectQuestion(8)"
+                  class="q-pill w-9 h-9 rounded-xl font-semibold text-xs bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center"
+                >
+                  9
+                </button>
+                <button
+                  onclick="selectQuestion(9)"
+                  class="q-pill w-9 h-9 rounded-xl font-semibold text-xs bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center"
+                >
+                  10
+                </button>
+              </div>
+            </div>
+
+            <!-- Question Block -->
+            <div class="space-y-4 pt-2">
+              <div class="flex items-center justify-between">
+                <span
+                  id="q-num-label"
+                  class="text-xs font-bold text-brand-blue uppercase"
+                  >Question 1 of 10</span
+                >
+                <span class="text-xs text-slate-400 font-semibold"
+                  >Multiple Choice</span
+                >
+              </div>
+
+              <h3
+                class="text-base sm:text-lg font-bold text-slate-900 leading-snug"
+              >
+                In React, what is the primary purpose of the `useCallback` hook,
+                and how does it optimize performance in re-renders?
+              </h3>
+
+              <!-- Choices -->
+              <div class="space-y-3 pt-2">
+                <label
+                  class="flex items-start space-x-3 p-4 rounded-xl border border-slate-200 hover:border-brand-blue cursor-pointer transition bg-slate-50/50"
+                >
+                  <input
+                    type="radio"
+                    name="q1"
+                    class="mt-1 text-brand-blue focus:ring-brand-blue"
+                  />
+                  <span class="text-xs sm:text-sm text-slate-800 font-medium"
+                    >To cache the computed return value of an expensive
+                    calculation between re-renders.</span
+                  >
+                </label>
+
+                <label
+                  class="flex items-start space-x-3 p-4 rounded-xl border border-brand-blue bg-blue-50/30 cursor-pointer transition"
+                >
+                  <input
+                    type="radio"
+                    name="q1"
+                    checked
+                    class="mt-1 text-brand-blue focus:ring-brand-blue"
+                  />
+                  <span class="text-xs sm:text-sm text-slate-900 font-semibold"
+                    >To memoize callback functions between re-renders to prevent
+                    unnecessary child re-renders.</span
+                  >
+                </label>
+
+                <label
+                  class="flex items-start space-x-3 p-4 rounded-xl border border-slate-200 hover:border-brand-blue cursor-pointer transition bg-slate-50/50"
+                >
+                  <input
+                    type="radio"
+                    name="q1"
+                    class="mt-1 text-brand-blue focus:ring-brand-blue"
+                  />
+                  <span class="text-xs sm:text-sm text-slate-800 font-medium"
+                    >To manage asynchronous state mutations and API request
+                    lifecycles directly.</span
+                  >
+                </label>
+
+                <label
+                  class="flex items-start space-x-3 p-4 rounded-xl border border-slate-200 hover:border-brand-blue cursor-pointer transition bg-slate-50/50"
+                >
+                  <input
+                    type="radio"
+                    name="q1"
+                    class="mt-1 text-brand-blue focus:ring-brand-blue"
+                  />
+                  <span class="text-xs sm:text-sm text-slate-800 font-medium"
+                    >To trigger side effects after every DOM mutation is painted
+                    to the canvas.</span
+                  >
+                </label>
+              </div>
+            </div>
+
+            <div
+              class="flex items-center justify-between pt-4 border-t border-slate-100"
+            >
+              <button
+                onclick="triggerToast('Previous question')"
+                class="px-5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+              >
+                Previous
+              </button>
+              <button
+                onclick="
+                  triggerToast('Answer saved');
+                  selectQuestion(1);
+                "
+                class="px-6 py-2.5 rounded-xl bg-brand-blue hover:bg-brand-hover text-xs font-bold text-white shadow-sm"
+              >
+                Next question ›
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- RECRUITER VIEW 2: JOB LISTINGS -->
+        <div
+          id="view-recruiter-jobs"
+          class="recruiter-view hidden space-y-6 max-w-6xl mx-auto"
+        >
+          <div
+            class="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+          >
+            <div>
+              <h1 class="text-2xl font-bold text-slate-900">Job listings</h1>
+              <p class="text-slate-500 text-xs sm:text-sm mt-0.5">
+                4 active roles
+              </p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button
+                onclick="openModal('modal-new-job')"
+                class="bg-brand-blue hover:bg-brand-hover text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-sm transition flex items-center space-x-2"
+              >
+                <i class="fa-solid fa-plus"></i>
+                <span>New job listing</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Status Filter Pills -->
+          <div
+            class="flex items-center space-x-2 overflow-x-auto pb-1 custom-scrollbar"
+          >
+            <button
+              class="px-5 py-2 rounded-full text-xs font-bold bg-brand-blue text-white shadow-sm shrink-0"
+            >
+              All
+            </button>
+            <button
+              class="px-5 py-2 rounded-full text-xs font-semibold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 shrink-0"
+            >
+              Active
+            </button>
+            <button
+              class="px-5 py-2 rounded-full text-xs font-semibold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 shrink-0"
+            >
+              Screening
+            </button>
+            <button
+              class="px-5 py-2 rounded-full text-xs font-semibold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 shrink-0"
+            >
+              Assessment
+            </button>
+            <button
+              class="px-5 py-2 rounded-full text-xs font-semibold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 shrink-0"
+            >
+              Closed
+            </button>
+          </div>
+
+          <!-- Job Cards List -->
+          <div class="space-y-3">
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+            >
+              <div class="flex items-center space-x-4">
+                <div
+                  class="w-12 h-12 rounded-2xl bg-blue-50 text-brand-blue flex items-center justify-center shrink-0 font-mono font-bold text-lg"
+                >
+                  { }
+                </div>
+                <div>
+                  <h3 class="font-bold text-slate-900 text-base">
+                    Senior Frontend Engineer
+                  </h3>
+                  <p class="text-xs text-slate-500 mt-0.5">
+                    Engineering • Remote • Posted 3 days ago
+                  </p>
+                </div>
+              </div>
+              <div
+                class="flex items-center space-x-4 w-full sm:w-auto justify-between sm:justify-end"
+              >
+                <span
+                  class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full"
+                  >Active</span
+                >
+                <div class="text-right">
+                  <span class="text-lg font-extrabold text-slate-900">87</span>
+                  <p class="text-[11px] text-slate-400 font-medium">
+                    applicants
+                  </p>
+                </div>
+                <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
+              </div>
+            </div>
+
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+            >
+              <div class="flex items-center space-x-4">
+                <div
+                  class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 text-lg"
+                >
+                  <i class="fa-solid fa-water"></i>
+                </div>
+                <div>
+                  <h3 class="font-bold text-slate-900 text-base">
+                    Data Scientist
+                  </h3>
+                  <p class="text-xs text-slate-500 mt-0.5">
+                    Analytics • Hybrid • Posted 6 days ago
+                  </p>
+                </div>
+              </div>
+              <div
+                class="flex items-center space-x-4 w-full sm:w-auto justify-between sm:justify-end"
+              >
+                <span
+                  class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full"
+                  >Screening</span
+                >
+                <div class="text-right">
+                  <span class="text-lg font-extrabold text-slate-900">112</span>
+                  <p class="text-[11px] text-slate-400 font-medium">
+                    applicants
+                  </p>
+                </div>
+                <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
+              </div>
+            </div>
+
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+            >
+              <div class="flex items-center space-x-4">
+                <div
+                  class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 text-lg"
+                >
+                  <i class="fa-solid fa-circle-dot"></i>
+                </div>
+                <div>
+                  <h3 class="font-bold text-slate-900 text-base">
+                    Product Marketing Manager
+                  </h3>
+                  <p class="text-xs text-slate-500 mt-0.5">
+                    Marketing • On-site • Posted 9 days ago
+                  </p>
+                </div>
+              </div>
+              <div
+                class="flex items-center space-x-4 w-full sm:w-auto justify-between sm:justify-end"
+              >
+                <span
+                  class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full"
+                  >Assessment</span
+                >
+                <div class="text-right">
+                  <span class="text-lg font-extrabold text-slate-900">54</span>
+                  <p class="text-[11px] text-slate-400 font-medium">
+                    applicants
+                  </p>
+                </div>
+                <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
+              </div>
+            </div>
+
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+            >
+              <div class="flex items-center space-x-4">
+                <div
+                  class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center shrink-0 text-lg"
+                >
+                  <i class="fa-solid fa-gear"></i>
+                </div>
+                <div>
+                  <h3 class="font-bold text-slate-900 text-base">
+                    HR Business Partner
+                  </h3>
+                  <p class="text-xs text-slate-500 mt-0.5">
+                    HR • Remote • Posted 12 days ago
+                  </p>
+                </div>
+              </div>
+              <div
+                class="flex items-center space-x-4 w-full sm:w-auto justify-between sm:justify-end"
+              >
+                <span
+                  class="bg-purple-100 text-purple-800 text-xs font-bold px-3 py-1 rounded-full"
+                  >Shortlisting</span
+                >
+                <div class="text-right">
+                  <span class="text-lg font-extrabold text-slate-900">31</span>
+                  <p class="text-[11px] text-slate-400 font-medium">
+                    applicants
+                  </p>
+                </div>
+                <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
+              </div>
+            </div>
+
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 opacity-75"
+            >
+              <div class="flex items-center space-x-4">
+                <div
+                  class="w-12 h-12 rounded-2xl bg-cyan-50 text-cyan-600 flex items-center justify-center shrink-0 text-lg"
+                >
+                  <i class="fa-solid fa-terminal"></i>
+                </div>
+                <div>
+                  <h3 class="font-bold text-slate-900 text-base">
+                    DevOps Engineer
+                  </h3>
+                  <p class="text-xs text-slate-500 mt-0.5">
+                    Infrastructure • Remote • Closed 5 days ago
+                  </p>
+                </div>
+              </div>
+              <div
+                class="flex items-center space-x-4 w-full sm:w-auto justify-between sm:justify-end"
+              >
+                <span
+                  class="bg-slate-200 text-slate-700 text-xs font-bold px-3 py-1 rounded-full"
+                  >Closed</span
+                >
+                <div class="text-right">
+                  <span class="text-lg font-extrabold text-slate-900">62</span>
+                  <p class="text-[11px] text-slate-400 font-medium">
+                    applicants
+                  </p>
+                </div>
+                <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RECRUITER VIEW 3: CANDIDATES -->
+        <div
+          id="view-recruiter-candidates"
+          class="recruiter-view hidden space-y-6 max-w-6xl mx-auto"
+        >
+          <div>
+            <h1 class="text-2xl font-bold text-slate-900">Candidates</h1>
+            <p class="text-slate-500 text-xs sm:text-sm mt-0.5">
+              284 total applicants across all roles
+            </p>
+          </div>
+
+          <!-- Stats Badges -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm border-t-4 border-t-blue-500"
+            >
+              <p class="text-slate-500 text-xs font-semibold">Under review</p>
+              <h2 class="text-3xl font-extrabold text-blue-600 mt-2">48</h2>
+              <span class="inline-block text-xs text-slate-400 font-medium mt-1"
+                >Auto-notified</span
+              >
+            </div>
+
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm border-t-4 border-t-purple-500"
+            >
+              <p class="text-slate-500 text-xs font-semibold">Shortlisted</p>
+              <h2 class="text-3xl font-extrabold text-purple-600 mt-2">24</h2>
+              <span class="inline-block text-xs text-slate-400 font-medium mt-1"
+                >Auto-notified</span
+              >
+            </div>
+
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm border-t-4 border-t-slate-800"
+            >
+              <p class="text-slate-500 text-xs font-semibold">Rejected</p>
+              <h2 class="text-3xl font-extrabold text-slate-800 mt-2">15</h2>
+              <span class="inline-block text-xs text-slate-400 font-medium mt-1"
+                >Auto-notified</span
+              >
+            </div>
+          </div>
+
+          <!-- Candidate Updates Header -->
+          <div class="pt-2">
+            <h2 class="text-lg font-bold text-slate-900 mb-4">
+              Recent status changes
+            </h2>
+
+            <div class="space-y-3">
+              <div
+                class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+              >
+                <div class="flex items-center space-x-4">
+                  <div
+                    class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 text-lg"
+                  >
+                    <i class="fa-regular fa-star"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-slate-900 text-base">
+                      Kofi Asante
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">
+                      Senior Frontend Engineer • Status updated to Shortlisted
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end"
+                >
+                  <span
+                    class="bg-purple-100 text-purple-800 text-xs font-bold px-3 py-1.5 rounded-full"
+                    >Shortlisted</span
+                  >
+                  <span class="text-xs text-slate-400 font-medium"
+                    >2 min ago</span
+                  >
+                </div>
+              </div>
+
+              <div
+                class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+              >
+                <div class="flex items-center space-x-4">
+                  <div
+                    class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 text-lg"
+                  >
+                    <i class="fa-regular fa-circle-dot"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-slate-900 text-base">
+                      Abena Quaye
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">
+                      Senior Frontend Engineer • Application is under review
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end"
+                >
+                  <span
+                    class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1.5 rounded-full"
+                    >Under review</span
+                  >
+                  <span class="text-xs text-slate-400 font-medium"
+                    >15 min ago</span
+                  >
+                </div>
+              </div>
+
+              <div
+                class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+              >
+                <div class="flex items-center space-x-4">
+                  <div
+                    class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 text-lg"
+                  >
+                    <i class="fa-solid fa-xmark"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-slate-900 text-base">
+                      David Nkrumah
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">
+                      Senior Frontend Engineer • Did not meet minimum pass
+                      threshold
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end"
+                >
+                  <span
+                    class="bg-rose-100 text-rose-800 text-xs font-bold px-3 py-1.5 rounded-full"
+                    >Rejected</span
+                  >
+                  <span class="text-xs text-slate-400 font-medium"
+                    >1 hr ago</span
+                  >
+                </div>
+              </div>
+
+              <div
+                class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+              >
+                <div class="flex items-center space-x-4">
+                  <div
+                    class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 text-lg"
+                  >
+                    <i class="fa-regular fa-star"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-slate-900 text-base">
+                      Sara Osei
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">
+                      Senior Frontend Engineer • Status updated to Shortlisted
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end"
+                >
+                  <span
+                    class="bg-purple-100 text-purple-800 text-xs font-bold px-3 py-1.5 rounded-full"
+                    >Shortlisted</span
+                  >
+                  <span class="text-xs text-slate-400 font-medium"
+                    >1 hr ago</span
+                  >
+                </div>
+              </div>
+
+              <div
+                class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+              >
+                <div class="flex items-center space-x-4">
+                  <div
+                    class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 text-lg"
+                  >
+                    <i class="fa-regular fa-calendar-check"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-slate-900 text-base">
+                      Kofi Asante
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">
+                      Senior Frontend Engineer • Interview invitation sent for
+                      Fri 30 May
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end"
+                >
+                  <span
+                    class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1.5 rounded-full"
+                    >Interview</span
+                  >
+                  <span class="text-xs text-slate-400 font-medium"
+                    >2 hrs ago</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RECRUITER VIEW 4: AI SCREENING -->
+        <div
+          id="view-recruiter-aiscreening"
+          class="recruiter-view hidden space-y-6 max-w-6xl mx-auto"
+        >
+          <div
+            class="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+          >
+            <div>
+              <h1 class="text-2xl font-bold text-slate-900">
+                AI screening — Senior Frontend Engineer
+              </h1>
+              <p class="text-slate-500 text-xs sm:text-sm mt-0.5">
+                87 CVs analysed • 24 shortlisted • 63 filtered out
+              </p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button
+                onclick="triggerToast('Loading ranking view...')"
+                class="bg-brand-blue hover:bg-brand-hover text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-sm transition"
+              >
+                View ranking ›
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Left: CV Extraction Box -->
+            <div
+              class="lg:col-span-6 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4"
+            >
+              <div
+                class="flex items-center space-x-2 text-xs font-semibold text-slate-500"
+              >
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span>CV extraction — kofi_asante_cv.pdf</span>
+              </div>
+
+              <div class="space-y-3 pt-2 text-xs sm:text-sm">
+                <div
+                  class="flex justify-between py-1.5 border-b border-slate-100"
+                >
+                  <span class="text-slate-500 font-medium">Full name</span>
+                  <span class="font-bold text-slate-900">Kofi Asante</span>
+                </div>
+                <div
+                  class="flex justify-between py-1.5 border-b border-slate-100"
+                >
+                  <span class="text-slate-500 font-medium">Experience</span>
+                  <span class="font-bold text-slate-900">5 years</span>
+                </div>
+                <div
+                  class="flex justify-between py-1.5 border-b border-slate-100"
+                >
+                  <span class="text-slate-500 font-medium">Education</span>
+                  <span class="font-bold text-slate-900"
+                    >BSc Computer Science</span
+                  >
+                </div>
+                <div
+                  class="flex justify-between py-1.5 border-b border-slate-100"
+                >
+                  <span class="text-slate-500 font-medium">Top skills</span>
+                  <span class="font-bold text-slate-900"
+                    >React, TypeScript, Node.js</span
+                  >
+                </div>
+                <div
+                  class="flex justify-between py-1.5 border-b border-slate-100"
+                >
+                  <span class="text-slate-500 font-medium">Location</span>
+                  <span class="font-bold text-slate-900">Accra, Ghana</span>
+                </div>
+                <div class="flex justify-between py-1.5">
+                  <span class="text-slate-500 font-medium">Previous roles</span>
+                  <span class="font-bold text-slate-900"
+                    >Senior Dev, Frontend Eng.</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Scoring Breakdown Box -->
+            <div
+              class="lg:col-span-6 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between space-y-6"
+            >
+              <div class="space-y-4">
+                <p
+                  class="text-xs font-bold text-slate-500 uppercase tracking-wider"
+                >
+                  ◆ Scoring breakdown
+                </p>
+
+                <!-- Progress bars -->
+                <div class="space-y-3 text-xs">
+                  <div>
+                    <div
+                      class="flex justify-between mb-1 font-semibold text-slate-700"
+                    >
+                      <span>Technical skills</span>
+                      <span>88%</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-2">
+                      <div
+                        class="bg-brand-blue h-2 rounded-full"
+                        style="width: 88%"
+                      ></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div
+                      class="flex justify-between mb-1 font-semibold text-slate-700"
+                    >
+                      <span>Experience match</span>
+                      <span>82%</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-2">
+                      <div
+                        class="bg-indigo-500 h-2 rounded-full"
+                        style="width: 82%"
+                      ></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div
+                      class="flex justify-between mb-1 font-semibold text-slate-700"
+                    >
+                      <span>Job alignment</span>
+                      <span>91%</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-2">
+                      <div
+                        class="bg-emerald-500 h-2 rounded-full"
+                        style="width: 91%"
+                      ></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div
+                      class="flex justify-between mb-1 font-semibold text-slate-700"
+                    >
+                      <span>Skill relevance</span>
+                      <span>85%</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-2">
+                      <div
+                        class="bg-amber-500 h-2 rounded-full"
+                        style="width: 85%"
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Composite CV Score -->
+              <div
+                class="flex items-center justify-between border-t border-slate-100 pt-4"
+              >
+                <span class="text-xs font-bold text-slate-600"
+                  >Composite CV score</span
+                >
+                <span class="text-4xl font-black text-emerald-600">87</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Screening Funnel Widget -->
+          <div
+            class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4"
+          >
+            <h3 class="font-bold text-slate-900 text-base">
+              Screening funnel — Senior Frontend Engineer
+            </h3>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div class="bg-blue-50/70 p-4 rounded-xl text-center">
+                <span class="text-2xl font-black text-slate-900">87</span>
+                <p class="text-[11px] font-semibold text-slate-500 mt-1">
+                  Total CVs
+                </p>
+              </div>
+              <div class="bg-purple-50/70 p-4 rounded-xl text-center">
+                <span class="text-2xl font-black text-purple-700">24</span>
+                <p class="text-[11px] font-semibold text-purple-700 mt-1">
+                  AI shortlist
+                </p>
+              </div>
+              <div class="bg-emerald-50/70 p-4 rounded-xl text-center">
+                <span class="text-2xl font-black text-emerald-700">16</span>
+                <p class="text-[11px] font-semibold text-emerald-700 mt-1">
+                  Assessment
+                </p>
+              </div>
+              <div class="bg-amber-50/70 p-4 rounded-xl text-center">
+                <span class="text-2xl font-black text-amber-700">8</span>
+                <p class="text-[11px] font-semibold text-amber-700 mt-1">
+                  Interview
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RECRUITER VIEW 5: ANALYTICS -->
+        <div
+          id="view-recruiter-analytics"
+          class="recruiter-view hidden space-y-6 max-w-6xl mx-auto"
+        >
+          <div>
+            <h1 class="text-2xl font-bold text-slate-900">Analytics</h1>
+            <p class="text-slate-500 text-xs sm:text-sm mt-0.5">
+              Hiring performance overview — last 6 months
+            </p>
+          </div>
+
+          <!-- Stats Cards Row -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm border-t-4 border-t-blue-500"
+            >
+              <p class="text-slate-500 text-xs font-semibold">
+                Total applicants
+              </p>
+              <h2 class="text-3xl font-extrabold text-slate-900 mt-2">476</h2>
+              <span class="inline-block text-xs text-slate-400 font-medium mt-1"
+                >Last 6 months</span
+              >
+            </div>
+
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm border-t-4 border-t-emerald-500"
+            >
+              <p class="text-slate-500 text-xs font-semibold">Shortlisted</p>
+              <h2 class="text-3xl font-extrabold text-slate-900 mt-2">99</h2>
+              <span
+                class="inline-block text-xs text-emerald-600 font-semibold mt-1"
+                >20.8% pass rate</span
+              >
+            </div>
+
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm border-t-4 border-t-purple-500"
+            >
+              <p class="text-slate-500 text-xs font-semibold">
+                Interviews booked
+              </p>
+              <h2 class="text-3xl font-extrabold text-slate-900 mt-2">38</h2>
+              <span
+                class="inline-block text-xs text-purple-600 font-semibold mt-1"
+                >8% of total</span
+              >
+            </div>
+
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm border-t-4 border-t-amber-500"
+            >
+              <p class="text-slate-500 text-xs font-semibold">
+                Avg. time-to-hire
+              </p>
+              <h2 class="text-3xl font-extrabold text-slate-900 mt-2">
+                12 <span class="text-sm font-semibold">days</span>
+              </h2>
+              <span
+                class="inline-block text-xs text-emerald-600 font-semibold mt-1"
+                >↓ 38% vs prev.</span
+              >
+            </div>
+          </div>
+
+          <!-- Charts Row -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Left: Monthly Applicants vs Shortlisted -->
+            <div
+              class="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-6 flex flex-col justify-between"
+            >
+              <h3 class="font-bold text-slate-900 text-base">
+                Monthly applicants vs shortlisted
+              </h3>
+
+              <!-- Graphic bar mockup chart -->
+              <div
+                class="h-48 flex items-end justify-between px-4 pt-4 border-b border-slate-100 space-x-4"
+              >
+                <div
+                  class="flex-1 flex flex-col items-center gap-1 h-full justify-end"
+                >
+                  <div
+                    class="w-full max-w-[20px] bg-brand-blue rounded-t"
+                    style="height: 40%"
+                  ></div>
+                  <span class="text-[10px] text-slate-400 font-semibold mt-2"
+                    >Jan</span
+                  >
+                </div>
+                <div
+                  class="flex-1 flex flex-col items-center gap-1 h-full justify-end"
+                >
+                  <div
+                    class="w-full max-w-[20px] bg-brand-blue rounded-t"
+                    style="height: 60%"
+                  ></div>
+                  <span class="text-[10px] text-slate-400 font-semibold mt-2"
+                    >Feb</span
+                  >
+                </div>
+                <div
+                  class="flex-1 flex flex-col items-center gap-1 h-full justify-end"
+                >
+                  <div
+                    class="w-full max-w-[20px] bg-brand-blue rounded-t"
+                    style="height: 50%"
+                  ></div>
+                  <span class="text-[10px] text-slate-400 font-semibold mt-2"
+                    >Mar</span
+                  >
+                </div>
+                <div
+                  class="flex-1 flex flex-col items-center gap-1 h-full justify-end"
+                >
+                  <div
+                    class="w-full max-w-[20px] bg-brand-blue rounded-t"
+                    style="height: 75%"
+                  ></div>
+                  <span class="text-[10px] text-slate-400 font-semibold mt-2"
+                    >Apr</span
+                  >
+                </div>
+                <div
+                  class="flex-1 flex flex-col items-center gap-1 h-full justify-end"
+                >
+                  <div
+                    class="w-full max-w-[20px] bg-brand-blue rounded-t"
+                    style="height: 90%"
+                  ></div>
+                  <span class="text-[10px] text-slate-400 font-semibold mt-2"
+                    >May</span
+                  >
+                </div>
+                <div
+                  class="flex-1 flex flex-col items-center gap-1 h-full justify-end"
+                >
+                  <div
+                    class="w-full max-w-[20px] bg-brand-blue rounded-t"
+                    style="height: 100%"
+                  ></div>
+                  <span class="text-[10px] text-slate-400 font-semibold mt-2"
+                    >Jun</span
+                  >
+                </div>
+              </div>
+
+              <div class="flex items-center space-x-6 text-xs">
+                <div class="flex items-center space-x-2">
+                  <span class="w-3 h-3 bg-brand-blue rounded"></span>
+                  <span class="text-slate-600 font-medium">Applicants</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <span class="w-3 h-3 bg-emerald-500 rounded"></span>
+                  <span class="text-slate-600 font-medium">Shortlisted</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: AI Screening Performance metrics -->
+            <div
+              class="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4"
+            >
+              <h3 class="font-bold text-slate-900 text-base">
+                AI screening performance
+              </h3>
+
+              <div class="space-y-4 pt-2 text-xs">
+                <div>
+                  <div
+                    class="flex justify-between mb-1 font-semibold text-slate-700"
+                  >
+                    <span>CV parsing accuracy</span>
+                    <span>94%</span>
+                  </div>
+                  <div class="w-full bg-slate-100 rounded-full h-2">
+                    <div
+                      class="bg-brand-blue h-2 rounded-full"
+                      style="width: 94%"
+                    ></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div
+                    class="flex justify-between mb-1 font-semibold text-slate-700"
+                  >
+                    <span>Skill match precision</span>
+                    <span>88%</span>
+                  </div>
+                  <div class="w-full bg-slate-100 rounded-full h-2">
+                    <div
+                      class="bg-purple-500 h-2 rounded-full"
+                      style="width: 88%"
+                    ></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div
+                    class="flex justify-between mb-1 font-semibold text-slate-700"
+                  >
+                    <span>False positive rate</span>
+                    <span>6%</span>
+                  </div>
+                  <div class="w-full bg-slate-100 rounded-full h-2">
+                    <div
+                      class="bg-rose-500 h-2 rounded-full"
+                      style="width: 6%"
+                    ></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div
+                    class="flex justify-between mb-1 font-semibold text-slate-700"
+                  >
+                    <span>Candidate satisfaction</span>
+                    <span>91%</span>
+                  </div>
+                  <div class="w-full bg-slate-100 rounded-full h-2">
+                    <div
+                      class="bg-emerald-500 h-2 rounded-full"
+                      style="width: 91%"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Top performing job roles Table -->
+          <div
+            class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4"
+          >
+            <h3 class="font-bold text-slate-900 text-base">
+              Top performing job roles (by shortlist rate)
+            </h3>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead>
+                  <tr
+                    class="text-slate-400 uppercase border-b border-slate-100 text-[10px] font-bold tracking-wider"
+                  >
+                    <th class="py-3 px-2">Role</th>
+                    <th class="py-3 px-2">Applicants</th>
+                    <th class="py-3 px-2">Shortlisted</th>
+                    <th class="py-3 px-2">Pass Rate</th>
+                    <th class="py-3 px-2">Avg. Score</th>
+                    <th class="py-3 px-2">Status</th>
+                  </tr>
+                </thead>
+                <tbody
+                  class="divide-y divide-slate-100 text-slate-700 font-medium"
+                >
+                  <tr>
+                    <td class="py-3.5 px-2 font-bold text-slate-900">
+                      Senior Frontend Engineer
+                    </td>
+                    <td class="py-3.5 px-2">87</td>
+                    <td class="py-3.5 px-2">24</td>
+                    <td class="py-3.5 px-2 font-bold text-emerald-600">
+                      27.6%
+                    </td>
+                    <td class="py-3.5 px-2">81</td>
+                    <td class="py-3.5 px-2">
+                      <span
+                        class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-full"
+                        >Active</span
+                      >
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="py-3.5 px-2 font-bold text-slate-900">
+                      Data Scientist
+                    </td>
+                    <td class="py-3.5 px-2">112</td>
+                    <td class="py-3.5 px-2">30</td>
+                    <td class="py-3.5 px-2 font-bold text-emerald-600">
+                      26.7%
+                    </td>
+                    <td class="py-3.5 px-2">84</td>
+                    <td class="py-3.5 px-2">
+                      <span
+                        class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2.5 py-1 rounded-full"
+                        >Screening</span
+                      >
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- RECRUITER VIEW 6: SETTINGS -->
+        <div
+          id="view-recruiter-settings"
+          class="recruiter-view hidden space-y-6 max-w-3xl mx-auto"
+        >
+          <div>
+            <h1 class="text-2xl font-bold text-slate-900">Settings</h1>
+            <p class="text-slate-500 text-xs sm:text-sm mt-0.5">
+              Recruiter profile and team workspace preferences
+            </p>
+          </div>
+
+          <div
+            class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-100 shadow-sm space-y-6"
+          >
+            <h2 class="text-base font-bold text-slate-900">
+              Company & Recruiter Profile
+            </h2>
+            <form
+              onsubmit="
+                event.preventDefault();
+                triggerToast('Recruiter profile updated');
+              "
+              class="space-y-4"
+            >
+              <div class="space-y-1.5">
+                <label
+                  class="text-[11px] font-bold tracking-wider text-slate-400 uppercase"
+                  >COMPANY NAME</label
+                >
+                <input
+                  type="text"
+                  value="TechCorp Ghana Ltd"
+                  class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm"
+                />
+              </div>
+              <div class="space-y-1.5">
+                <label
+                  class="text-[11px] font-bold tracking-wider text-slate-400 uppercase"
+                  >RECRUITER EMAIL</label
+                >
+                <input
+                  type="email"
+                  value="hr@techcorp.gh"
+                  class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm"
+                />
+              </div>
+              <div class="flex justify-end pt-2">
+                <button
+                  type="submit"
+                  class="bg-brand-blue text-white font-semibold text-xs px-6 py-3 rounded-xl"
+                >
+                  Save changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </main>
+      <!-- Mobile bottom navigation -->
+      <nav
+        class="md:hidden fixed bottom-0 inset-x-0 z-40 bg-navy-900/95 backdrop-blur border-t border-slate-800 safe-bottom"
+      >
+        <div class="flex items-stretch max-w-lg mx-auto">
+          <button
+            onclick="switchView('recruiter-dashboard')"
+            data-view="recruiter-dashboard"
+            data-portal="recruiter"
+            class="mnav-item flex-1 flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[10px] font-semibold text-slate-400 transition-colors"
+          >
+            <span
+              class="mnav-ico w-12 h-7 rounded-full flex items-center justify-center transition-colors"
+              ><i class="fa-solid fa-border-all text-[15px]"></i
+            ></span>
+            <span>Home</span>
+          </button>
+          <button
+            onclick="switchView('recruiter-jobs')"
+            data-view="recruiter-jobs"
+            data-portal="recruiter"
+            class="mnav-item flex-1 flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[10px] font-semibold text-slate-400 transition-colors"
+          >
+            <span
+              class="mnav-ico w-12 h-7 rounded-full flex items-center justify-center transition-colors"
+              ><i class="fa-solid fa-layer-group text-[15px]"></i
+            ></span>
+            <span>Jobs</span>
+          </button>
+          <button
+            onclick="switchView('recruiter-candidates')"
+            data-view="recruiter-candidates"
+            data-portal="recruiter"
+            class="mnav-item flex-1 flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[10px] font-semibold text-slate-400 transition-colors"
+          >
+            <span
+              class="mnav-ico w-12 h-7 rounded-full flex items-center justify-center transition-colors"
+              ><i class="fa-regular fa-circle-user text-[15px]"></i
+            ></span>
+            <span>Candidates</span>
+          </button>
+          <button
+            onclick="switchView('recruiter-aiscreening')"
+            data-view="recruiter-aiscreening"
+            data-portal="recruiter"
+            class="mnav-item flex-1 flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[10px] font-semibold text-slate-400 transition-colors"
+          >
+            <span
+              class="mnav-ico w-12 h-7 rounded-full flex items-center justify-center transition-colors"
+              ><i class="fa-solid fa-sparkles text-[15px]"></i
+            ></span>
+            <span>AI Screen</span>
+          </button>
+          <button
+            onclick="switchView('recruiter-analytics')"
+            data-view="recruiter-analytics"
+            data-portal="recruiter"
+            class="mnav-item flex-1 flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[10px] font-semibold text-slate-400 transition-colors"
+          >
+            <span
+              class="mnav-ico w-12 h-7 rounded-full flex items-center justify-center transition-colors"
+              ><i class="fa-solid fa-chart-simple text-[15px]"></i
+            ></span>
+            <span>Analytics</span>
+          </button>
+        </div>
+      </nav>
+    </div>
+
+    <!-- JOB SEEKER PORTAL LAYOUT -->
+    <div
+      id="portal-layout"
+      class="hidden min-h-screen flex flex-col md:flex-row w-full bg-slate-50"
+    >
+      <!-- Mobile top bar -->
+      <header
+        class="md:hidden sticky top-0 z-30 bg-navy-900 border-b border-slate-800 safe-top"
+      >
+        <div class="flex items-center justify-between px-4 h-14">
+          <div class="cursor-pointer" onclick="switchView('dashboard')">
+            <div
+              class="flex items-center space-x-1 text-xl font-black tracking-tight leading-none"
+            >
+              <span class="text-white">Skill</span
+              ><span class="text-brand-orange">Match</span>
+            </div>
+            <p class="text-slate-400 text-[10px] font-medium mt-0.5">
+              Job Seeker Portal
+            </p>
+          </div>
+          <div class="flex items-center space-x-1">
+            <button
+              onclick="switchView('login')"
+              aria-label="Sign out"
+              class="w-10 h-10 rounded-xl text-slate-400 hover:text-red-400 hover:bg-slate-800/60 flex items-center justify-center transition"
+            >
+              <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            </button>
+          </div>
+        </div>
+      </header>
+      <!-- Sidebar Navigation -->
+      <aside
+        class="w-full md:w-64 bg-navy-900 text-slate-300 hidden md:flex flex-col justify-between shrink-0 min-h-screen border-r border-slate-800"
+      >
+        <div class="p-6 space-y-8">
+          <!-- Portal Logo Header -->
+          <div class="space-y-1">
+            <div
+              class="flex items-center space-x-1 text-2xl font-black tracking-tight cursor-pointer"
+              onclick="switchView('dashboard')"
+            >
+              <span class="text-white">Skill</span
+              ><span class="text-brand-orange">Match</span>
+            </div>
+            <p class="text-slate-400 text-xs font-medium">Job Seeker Portal</p>
+          </div>
+
+          <!-- Nav Groups -->
+          <nav class="space-y-6">
+            <div>
+              <p
+                class="text-[11px] font-bold tracking-wider text-slate-500 uppercase px-4 mb-3"
+              >
+                MAIN
+              </p>
+              <div class="space-y-1">
+                <button
+                  onclick="switchView('dashboard')"
+                  data-view="dashboard"
+                  class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium bg-slate-800 text-white shadow-sm transition-all"
+                >
+                  <i class="fa-solid fa-border-all w-5"></i>
+                  <span class="text-sm">Dashboard</span>
+                </button>
+                <button
+                  onclick="switchView('browse')"
+                  data-view="browse"
+                  class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all justify-between"
+                >
+                  <div class="flex items-center space-x-3">
+                    <i class="fa-regular fa-compass w-5"></i>
+                    <span class="text-sm">Browse Jobs</span>
+                  </div>
+                  <span
+                    class="bg-brand-blue text-white text-[11px] font-bold px-2 py-0.5 rounded-full"
+                    >127</span
+                  >
+                </button>
+                <button
+                  onclick="switchView('applications')"
+                  data-view="applications"
+                  class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all justify-between"
+                >
+                  <div class="flex items-center space-x-3">
+                    <i class="fa-regular fa-paper-plane w-5"></i>
+                    <span class="text-sm">My Applications</span>
+                  </div>
+                  <span
+                    class="bg-slate-700 text-slate-200 text-[11px] font-bold px-2 py-0.5 rounded-full"
+                    >8</span
+                  >
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <p
+                class="text-[11px] font-bold tracking-wider text-slate-500 uppercase px-4 mb-3"
+              >
+                ACCOUNT
+              </p>
+              <div class="space-y-1">
+                <button
+                  onclick="switchView('profile')"
+                  data-view="profile"
+                  class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all"
+                >
+                  <i class="fa-regular fa-user w-5"></i>
+                  <span class="text-sm">My Profile</span>
+                </button>
+                <button
+                  onclick="switchView('settings')"
+                  data-view="settings"
+                  class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all"
+                >
+                  <i class="fa-solid fa-gear w-5"></i>
+                  <span class="text-sm">Settings</span>
+                </button>
+              </div>
+            </div>
+          </nav>
+        </div>
+
+        <!-- Bottom Action & Logout -->
+        <div class="p-6 space-y-4">
+          <button
+            onclick="switchView('login')"
+            class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl font-medium text-slate-400 hover:text-red-400 hover:bg-slate-800/50 transition text-sm"
+          >
+            <i class="fa-solid fa-arrow-right-from-bracket w-5"></i>
+            <span>Sign Out</span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Right Side Main View Content -->
+      <main
+        class="flex-1 min-w-0 overflow-y-auto custom-scrollbar p-4 sm:p-6 md:p-10 pb-28 md:pb-10"
+      >
+        <!-- VIEW 1: DASHBOARD -->
+        <div
+          id="view-dashboard"
+          class="portal-view space-y-8 max-w-6xl mx-auto"
+        >
+          <!-- Header -->
+          <div
+            class="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+          >
+            <div>
+              <h1 class="text-2xl font-bold text-slate-900">Dashboard</h1>
+              <p class="text-slate-500 text-xs sm:text-sm mt-0.5">
+                Friday, 6 June 2026
+              </p>
+            </div>
+            <button
+              onclick="switchView('browse')"
+              class="bg-brand-blue hover:bg-brand-hover text-white font-semibold px-5 py-2.5 rounded-xl shadow-sm transition text-sm flex items-center space-x-2 self-start sm:self-auto"
+            >
+              <span>Browse jobs</span>
+            </button>
+          </div>
+
+          <!-- Stats Cards Row -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Stat Card 1 -->
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden border-t-4 border-t-blue-500"
+            >
+              <p class="text-slate-500 text-xs font-semibold">
+                Applications sent
+              </p>
+              <h2 class="text-3xl font-extrabold text-slate-900 mt-2">8</h2>
+              <span
+                class="inline-block text-xs text-emerald-600 font-semibold mt-2"
+                >This month</span
+              >
+            </div>
+
+            <!-- Stat Card 2 -->
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden border-t-4 border-t-purple-500"
+            >
+              <p class="text-slate-500 text-xs font-semibold">Profile views</p>
+              <h2 class="text-3xl font-extrabold text-slate-900 mt-2">24</h2>
+              <span class="inline-block text-xs text-slate-500 font-medium mt-2"
+                >By recruiters</span
+              >
+            </div>
+
+            <!-- Stat Card 3 -->
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden border-t-4 border-t-teal-500"
+            >
+              <p class="text-slate-500 text-xs font-semibold">Shortlisted</p>
+              <h2 class="text-3xl font-extrabold text-slate-900 mt-2">3</h2>
+              <span
+                class="inline-block text-xs text-emerald-600 font-semibold mt-2"
+                >Active interviews</span
+              >
+            </div>
+
+            <!-- Stat Card 4 -->
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden border-t-4 border-t-amber-500"
+            >
+              <p class="text-slate-500 text-xs font-semibold">Match score</p>
+              <h2 class="text-3xl font-extrabold text-slate-900 mt-2">
+                87<span class="text-lg font-bold">%</span>
+              </h2>
+              <span class="inline-block text-xs text-slate-500 font-medium mt-2"
+                >Avg. for applied jobs</span
+              >
+            </div>
+          </div>
+
+          <!-- Recommended Jobs Section -->
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <h2 class="text-lg font-bold text-slate-900">
+                Recommended for you
+              </h2>
+              <button
+                onclick="switchView('browse')"
+                class="text-xs sm:text-sm font-semibold text-brand-blue hover:underline"
+              >
+                View all jobs
+              </button>
+            </div>
+
+            <div class="space-y-3">
+              <!-- Job Item 1 -->
+              <div
+                class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-100 hover:border-slate-300 transition-all shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+              >
+                <div class="flex items-center space-x-4">
+                  <div
+                    class="w-12 h-12 rounded-2xl bg-blue-50 text-brand-blue flex items-center justify-center shrink-0 font-mono font-bold text-lg"
+                  >
+                    { }
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-slate-900 text-base">
+                      Junior Software Developer
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">
+                      TechHub Accra • Accra, Ghana • Remote •
+                      <span class="font-semibold text-slate-700"
+                        >₦150k/month</span
+                      >
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end"
+                >
+                  <span
+                    class="bg-emerald-50 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-full border border-emerald-200"
+                    >92% Match</span
+                  >
+                  <button
+                    onclick="openApplyModal('Junior Software Developer')"
+                    class="bg-brand-blue hover:bg-brand-hover text-white font-semibold text-xs px-4 py-2.5 rounded-xl transition"
+                  >
+                    Apply now
+                  </button>
+                </div>
+              </div>
+
+              <!-- Job Item 2 -->
+              <div
+                class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-100 hover:border-slate-300 transition-all shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+              >
+                <div class="flex items-center space-x-4">
+                  <div
+                    class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 text-lg"
+                  >
+                    <i class="fa-solid fa-layer-group"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-slate-900 text-base">
+                      Frontend Engineer
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">
+                      StartupLabs • Lagos, Nigeria • On-site •
+                      <span class="font-semibold text-slate-700"
+                        >₦180k/month</span
+                      >
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end"
+                >
+                  <span
+                    class="bg-purple-50 text-purple-700 text-xs font-bold px-3 py-1.5 rounded-full border border-purple-200"
+                    >87% Match</span
+                  >
+                  <button
+                    onclick="openApplyModal('Frontend Engineer')"
+                    class="bg-brand-blue hover:bg-brand-hover text-white font-semibold text-xs px-4 py-2.5 rounded-xl transition"
+                  >
+                    Apply now
+                  </button>
+                </div>
+              </div>
+
+              <!-- Job Item 3 -->
+              <div
+                class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-100 hover:border-slate-300 transition-all shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+              >
+                <div class="flex items-center space-x-4">
+                  <div
+                    class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 text-lg"
+                  >
+                    <i class="fa-solid fa-circle-nodes"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-slate-900 text-base">
+                      Full Stack Developer
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">
+                      DevCraft Solutions • Remote • Hybrid •
+                      <span class="font-semibold text-slate-700"
+                        >$2,500/month</span
+                      >
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end"
+                >
+                  <span
+                    class="bg-blue-50 text-blue-700 text-xs font-bold px-3 py-1.5 rounded-full border border-blue-200"
+                    >84% Match</span
+                  >
+                  <button
+                    onclick="openApplyModal('Full Stack Developer')"
+                    class="bg-brand-blue hover:bg-brand-hover text-white font-semibold text-xs px-4 py-2.5 rounded-xl transition"
+                  >
+                    Apply now
+                  </button>
+                </div>
+              </div>
+
+              <!-- Job Item 4 -->
+              <div
+                class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-100 hover:border-slate-300 transition-all shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+              >
+                <div class="flex items-center space-x-4">
+                  <div
+                    class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 text-lg"
+                  >
+                    <i class="fa-solid fa-bolt"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-slate-900 text-base">
+                      React Developer
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">
+                      WebWorks Nigeria • Abuja, Nigeria • Remote •
+                      <span class="font-semibold text-slate-700"
+                        >₦140k/month</span
+                      >
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end"
+                >
+                  <span
+                    class="bg-amber-50 text-amber-700 text-xs font-bold px-3 py-1.5 rounded-full border border-amber-200"
+                    >81% Match</span
+                  >
+                  <button
+                    onclick="openApplyModal('React Developer')"
+                    class="bg-brand-blue hover:bg-brand-hover text-white font-semibold text-xs px-4 py-2.5 rounded-xl transition"
+                  >
+                    Apply now
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Applications Section Header -->
+          <div class="pt-4 flex items-center justify-between">
+            <h2 class="text-lg font-bold text-slate-900">
+              Recent applications
+            </h2>
+            <button
+              onclick="switchView('applications')"
+              class="text-xs sm:text-sm font-semibold text-brand-blue hover:underline"
+            >
+              View all
+            </button>
+          </div>
+        </div>
+
+        <!-- VIEW 2: BROWSE JOBS -->
+        <div
+          id="view-browse"
+          class="portal-view hidden space-y-6 max-w-6xl mx-auto"
+        >
+          <div
+            class="flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+          >
+            <div>
+              <h1 class="text-2xl font-bold text-slate-900">Browse Jobs</h1>
+              <p class="text-slate-500 text-xs sm:text-sm mt-0.5">
+                127 jobs available • AI-matched to your profile
+              </p>
+            </div>
+            <button
+              onclick="triggerToast('Already on Premium')"
+              class="self-start sm:self-auto bg-amber-50 text-amber-700 font-bold text-xs px-4 py-2 rounded-xl border border-amber-200 flex items-center space-x-2"
+            >
+              <i class="fa-solid fa-star text-amber-500"></i>
+              <span>Premium Jobs</span>
+            </button>
+          </div>
+
+          <!-- Search and Filters Bar -->
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+            <div class="md:col-span-6 relative">
+              <i
+                class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"
+              ></i>
+              <input
+                type="text"
+                placeholder="Search jobs by title, company, or skills..."
+                class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/30 focus:border-brand-blue bg-white"
+              />
+            </div>
+            <div class="md:col-span-2">
+              <select
+                class="w-full px-3 py-3 rounded-xl border border-slate-200 text-sm text-slate-700 bg-white focus:outline-none"
+              >
+                <option>All locations</option>
+                <option>Accra, Ghana</option>
+                <option>Lagos, Nigeria</option>
+                <option>Abuja, Nigeria</option>
+              </select>
+            </div>
+            <div class="md:col-span-2">
+              <select
+                class="w-full px-3 py-3 rounded-xl border border-slate-200 text-sm text-slate-700 bg-white focus:outline-none"
+              >
+                <option>All types</option>
+                <option>Full-time</option>
+                <option>Contract</option>
+                <option>Remote</option>
+              </select>
+            </div>
+            <div class="md:col-span-2">
+              <select
+                class="w-full px-3 py-3 rounded-xl border border-slate-200 text-sm text-slate-700 bg-white focus:outline-none"
+              >
+                <option>All levels</option>
+                <option>Junior</option>
+                <option>Mid Level</option>
+                <option>Senior</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="text-xs text-slate-500 font-medium">
+            Showing 8 jobs • Sorted by relevance
+          </div>
+
+          <!-- Job List -->
+          <div class="space-y-3">
+            <!-- Item 1 -->
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-100 hover:border-slate-300 transition-all shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+            >
+              <div class="flex items-center space-x-4">
+                <div
+                  class="w-12 h-12 rounded-2xl bg-blue-50 text-brand-blue flex items-center justify-center shrink-0 font-mono font-bold text-lg"
+                >
+                  { }
+                </div>
+                <div>
+                  <h3 class="font-bold text-slate-900 text-base">
+                    Senior Frontend Engineer
+                  </h3>
+                  <p class="text-xs text-slate-500 mt-0.5">
+                    TechCorp Ghana Ltd • Accra, Ghana • Remote
+                  </p>
+                  <p class="text-xs font-bold text-emerald-600 mt-1">
+                    ₦200k-280k/month
+                  </p>
+                </div>
+              </div>
+              <div
+                class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end"
+              >
+                <span
+                  class="bg-emerald-50 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-full border border-emerald-200"
+                  >92% Match</span
+                >
+                <button
+                  onclick="openApplyModal('Senior Frontend Engineer')"
+                  class="bg-brand-blue hover:bg-brand-hover text-white font-semibold text-xs px-4 py-2.5 rounded-xl transition"
+                >
+                  Apply now
+                </button>
+              </div>
+            </div>
+
+            <!-- Item 2 -->
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-100 hover:border-slate-300 transition-all shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+            >
+              <div class="flex items-center space-x-4">
+                <div
+                  class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 font-mono font-bold text-lg"
+                >
+                  { }
+                </div>
+                <div>
+                  <h3 class="font-bold text-slate-900 text-base">
+                    Junior Software Developer
+                  </h3>
+                  <p class="text-xs text-slate-500 mt-0.5">
+                    TechHub Accra • Accra, Ghana • Remote
+                  </p>
+                  <p class="text-xs font-bold text-emerald-600 mt-1">
+                    ₦140k-180k/month
+                  </p>
+                </div>
+              </div>
+              <div
+                class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end"
+              >
+                <span
+                  class="bg-emerald-50 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-full border border-emerald-200"
+                  >89% Match</span
+                >
+                <button
+                  onclick="openApplyModal('Junior Software Developer')"
+                  class="bg-brand-blue hover:bg-brand-hover text-white font-semibold text-xs px-4 py-2.5 rounded-xl transition"
+                >
+                  Apply now
+                </button>
+              </div>
+            </div>
+
+            <!-- Locked Premium Item 3 -->
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+            >
+              <div class="flex items-center space-x-4">
+                <div
+                  class="w-12 h-12 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center shrink-0 text-lg"
+                >
+                  <i class="fa-solid fa-water"></i>
+                </div>
+                <div>
+                  <h3 class="font-bold text-slate-900 text-base">
+                    Data Scientist
+                  </h3>
+                  <p class="text-xs text-slate-500 mt-0.5">
+                    DataFlow Analytics • Lagos, Nigeria • Hybrid
+                  </p>
+                  <p class="text-xs font-bold text-emerald-600 mt-1">
+                    ₦250k-350k/month
+                  </p>
+                </div>
+              </div>
+              <div
+                class="flex items-center space-x-3 w-full sm:w-auto justify-end"
+              >
+                <button
+                  onclick="triggerToast('Upgrade to unlock premium roles')"
+                  class="bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold px-4 py-2 rounded-xl border border-slate-200 flex items-center space-x-2"
+                >
+                  <i class="fa-solid fa-lock text-slate-400 text-xs"></i>
+                  <span>Unlock</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Locked Premium Item 4 -->
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+            >
+              <div class="flex items-center space-x-4">
+                <div
+                  class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center shrink-0 text-lg"
+                >
+                  <i class="fa-solid fa-circle-dot"></i>
+                </div>
+                <div>
+                  <h3 class="font-bold text-slate-900 text-base">
+                    Product Manager
+                  </h3>
+                  <p class="text-xs text-slate-500 mt-0.5">
+                    StartupHub Lagos • Lagos, Nigeria • On-site
+                  </p>
+                  <p class="text-xs font-bold text-emerald-600 mt-1">
+                    ₦300k-450k/month
+                  </p>
+                </div>
+              </div>
+              <div
+                class="flex items-center space-x-3 w-full sm:w-auto justify-end"
+              >
+                <button
+                  onclick="triggerToast('Upgrade to unlock premium roles')"
+                  class="bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold px-4 py-2 rounded-xl border border-slate-200 flex items-center space-x-2"
+                >
+                  <i class="fa-solid fa-lock text-slate-400 text-xs"></i>
+                  <span>Unlock</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIEW 3: MY APPLICATIONS -->
+        <div
+          id="view-applications"
+          class="portal-view hidden space-y-6 max-w-6xl mx-auto"
+        >
+          <div>
+            <h1 class="text-2xl font-bold text-slate-900">My Applications</h1>
+            <p class="text-slate-500 text-xs sm:text-sm mt-0.5">
+              8 total applications
+            </p>
+          </div>
+
+          <!-- Tabs Filter -->
+          <div
+            class="flex items-center space-x-2 overflow-x-auto pb-2 custom-scrollbar"
+          >
+            <button
+              onclick="filterApps('all')"
+              id="tab-app-all"
+              class="app-tab-btn px-4 py-2 rounded-full text-xs font-bold bg-brand-blue text-white shadow-sm shrink-0"
+            >
+              All (8)
+            </button>
+            <button
+              onclick="filterApps('shortlisted')"
+              id="tab-app-shortlisted"
+              class="app-tab-btn px-4 py-2 rounded-full text-xs font-semibold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 shrink-0"
+            >
+              Shortlisted (3)
+            </button>
+            <button
+              onclick="filterApps('under-review')"
+              id="tab-app-under-review"
+              class="app-tab-btn px-4 py-2 rounded-full text-xs font-semibold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 shrink-0"
+            >
+              Under review (4)
+            </button>
+            <button
+              onclick="filterApps('not-selected')"
+              id="tab-app-not-selected"
+              class="app-tab-btn px-4 py-2 rounded-full text-xs font-semibold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 shrink-0"
+            >
+              Not selected (1)
+            </button>
+          </div>
+
+          <!-- Application List Container -->
+          <div id="applications-container" class="space-y-3">
+            <!-- Dynamically populated or statically styled matching design -->
+            <!-- App Card 1 -->
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+            >
+              <div class="flex items-center space-x-4">
+                <div
+                  class="w-12 h-12 rounded-2xl bg-blue-50 text-brand-blue flex items-center justify-center shrink-0 font-mono font-bold text-lg"
+                >
+                  { }
+                </div>
+                <div>
+                  <h3 class="font-bold text-slate-900 text-base">
+                    Senior Frontend Engineer
+                  </h3>
+                  <p class="text-xs text-slate-500 mt-0.5">
+                    TechCorp Ghana • Applied 3 days ago
+                  </p>
+                </div>
+              </div>
+              <div
+                class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end"
+              >
+                <span
+                  class="bg-purple-100/70 text-purple-700 text-xs font-bold px-3 py-1.5 rounded-full"
+                  >Shortlisted</span
+                >
+                <button
+                  onclick="switchView('profile')"
+                  class="border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold px-4 py-2 rounded-xl transition"
+                >
+                  View profile
+                </button>
+              </div>
+            </div>
+
+            <!-- App Card 2 -->
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+            >
+              <div class="flex items-center space-x-4">
+                <div
+                  class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 text-lg"
+                >
+                  <i class="fa-solid fa-atom"></i>
+                </div>
+                <div>
+                  <h3 class="font-bold text-slate-900 text-base">
+                    React Developer
+                  </h3>
+                  <p class="text-xs text-slate-500 mt-0.5">
+                    WebWorks Nigeria • Applied 3 days ago
+                  </p>
+                </div>
+              </div>
+              <div
+                class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end"
+              >
+                <span
+                  class="bg-purple-100/70 text-purple-700 text-xs font-bold px-3 py-1.5 rounded-full"
+                  >Shortlisted</span
+                >
+                <button
+                  onclick="switchView('profile')"
+                  class="border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold px-4 py-2 rounded-xl transition"
+                >
+                  View profile
+                </button>
+              </div>
+            </div>
+
+            <!-- App Card 3 -->
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+            >
+              <div class="flex items-center space-x-4">
+                <div
+                  class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center shrink-0 text-lg"
+                >
+                  <i class="fa-solid fa-layer-group"></i>
+                </div>
+                <div>
+                  <h3 class="font-bold text-slate-900 text-base">
+                    Frontend Engineer
+                  </h3>
+                  <p class="text-xs text-slate-500 mt-0.5">
+                    StartupLabs • Applied 4 days ago
+                  </p>
+                </div>
+              </div>
+              <div
+                class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end"
+              >
+                <span
+                  class="bg-amber-100/80 text-amber-800 text-xs font-bold px-3 py-1.5 rounded-full"
+                  >Assessment sent</span
+                >
+                <button
+                  onclick="triggerToast('Opening assessment modal...')"
+                  class="border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold px-4 py-2 rounded-xl transition"
+                >
+                  Take assessment
+                </button>
+              </div>
+            </div>
+
+            <!-- App Card 4 -->
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+            >
+              <div class="flex items-center space-x-4">
+                <div
+                  class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 text-lg"
+                >
+                  <i class="fa-solid fa-circle-nodes"></i>
+                </div>
+                <div>
+                  <h3 class="font-bold text-slate-900 text-base">
+                    Full Stack Developer
+                  </h3>
+                  <p class="text-xs text-slate-500 mt-0.5">
+                    BuildIt Solutions • Applied 5 days ago
+                  </p>
+                </div>
+              </div>
+              <div
+                class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end"
+              >
+                <span
+                  class="bg-blue-100/70 text-blue-700 text-xs font-bold px-3 py-1.5 rounded-full"
+                  >Under review</span
+                >
+                <button
+                  onclick="triggerToast('Application under recruiter review')"
+                  class="border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold px-4 py-2 rounded-xl transition"
+                >
+                  Check status
+                </button>
+              </div>
+            </div>
+
+            <!-- App Card 5 -->
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+            >
+              <div class="flex items-center space-x-4">
+                <div
+                  class="w-12 h-12 rounded-2xl bg-cyan-50 text-cyan-600 flex items-center justify-center shrink-0 text-lg"
+                >
+                  <i class="fa-solid fa-laptop-code"></i>
+                </div>
+                <div>
+                  <h3 class="font-bold text-slate-900 text-base">
+                    Junior Developer
+                  </h3>
+                  <p class="text-xs text-slate-500 mt-0.5">
+                    CodeAcademy Ghana • Applied 6 days ago
+                  </p>
+                </div>
+              </div>
+              <div
+                class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end"
+              >
+                <span
+                  class="bg-blue-100/70 text-blue-700 text-xs font-bold px-3 py-1.5 rounded-full"
+                  >Under review</span
+                >
+                <button
+                  onclick="triggerToast('Application under recruiter review')"
+                  class="border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold px-4 py-2 rounded-xl transition"
+                >
+                  Check status
+                </button>
+              </div>
+            </div>
+
+            <!-- App Card 6 -->
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+            >
+              <div class="flex items-center space-x-4">
+                <div
+                  class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 text-lg"
+                >
+                  <i class="fa-solid fa-bolt"></i>
+                </div>
+                <div>
+                  <h3 class="font-bold text-slate-900 text-base">
+                    Software Engineer
+                  </h3>
+                  <p class="text-xs text-slate-500 mt-0.5">
+                    DevHub Lagos • Applied 1 week ago
+                  </p>
+                </div>
+              </div>
+              <div
+                class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end"
+              >
+                <span
+                  class="bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-full"
+                  >CV reviewed</span
+                >
+                <button
+                  class="border border-slate-200 text-slate-400 text-xs font-semibold px-4 py-2 rounded-xl cursor-default"
+                >
+                  Waiting
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIEW 4: MY PROFILE -->
+        <div
+          id="view-profile"
+          class="portal-view hidden space-y-6 max-w-6xl mx-auto"
+        >
+          <div class="flex items-center justify-between">
+            <div>
+              <h1 class="text-2xl font-bold text-slate-900">My Profile</h1>
+              <p class="text-slate-500 text-xs sm:text-sm mt-0.5">
+                Complete your profile to increase match scores
+              </p>
+            </div>
+            <button
+              onclick="triggerToast('Edit mode enabled')"
+              class="border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold px-4 py-2.5 rounded-xl transition"
+            >
+              Edit profile
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Left Column: Bio Card + Profile Strength -->
+            <div class="lg:col-span-4 space-y-6">
+              <!-- Profile Card -->
+              <div
+                class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm text-center flex flex-col items-center space-y-4"
+              >
+                <!-- User Initials Avatar -->
+                <div
+                  class="w-20 h-20 rounded-full bg-indigo-500 text-white font-bold text-2xl flex items-center justify-center shadow-md"
+                >
+                  AS
+                </div>
+                <div>
+                  <h2 class="text-xl font-bold text-slate-900">
+                    Adewale Stephen
+                  </h2>
+                  <p class="text-xs text-slate-500 mt-0.5">
+                    Junior Software Developer
+                  </p>
+                </div>
+
+                <span
+                  class="inline-block bg-blue-50 text-brand-blue text-xs font-semibold px-3 py-1 rounded-full"
+                >
+                  Available for hire
+                </span>
+
+                <div
+                  class="w-full pt-4 border-t border-slate-100 space-y-2.5 text-left text-xs text-slate-600"
+                >
+                  <div class="flex items-center space-x-2.5">
+                    <i class="fa-regular fa-envelope text-slate-400 w-4"></i>
+                    <span>adewale.stephen@email.com</span>
+                  </div>
+                  <div class="flex items-center space-x-2.5">
+                    <i class="fa-solid fa-location-dot text-rose-500 w-4"></i>
+                    <span>Abuja, Nigeria</span>
+                  </div>
+                  <div class="flex items-center space-x-2.5">
+                    <i class="fa-solid fa-briefcase text-slate-400 w-4"></i>
+                    <span>2 years experience</span>
+                  </div>
+                  <div class="flex items-center space-x-2.5">
+                    <i
+                      class="fa-solid fa-graduation-cap text-slate-400 w-4"
+                    ></i>
+                    <span>BSc Computer Science</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Profile Strength Indicator Widget -->
+              <div
+                class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4"
+              >
+                <p
+                  class="text-[11px] font-bold tracking-wider text-slate-400 uppercase"
+                >
+                  PROFILE STRENGTH
+                </p>
+
+                <div class="flex flex-col items-center justify-center py-2">
+                  <div
+                    class="relative w-28 h-28 flex items-center justify-center"
+                  >
+                    <!-- Radial Circle Chart graphic mockup -->
+                    <svg
+                      class="w-full h-full transform -rotate-90"
+                      viewBox="0 0 36 36"
+                    >
+                      <path
+                        class="text-slate-100"
+                        stroke-width="3.5"
+                        stroke="currentColor"
+                        fill="none"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      />
+                      <path
+                        class="text-brand-blue"
+                        stroke-dasharray="80, 100"
+                        stroke-width="3.5"
+                        stroke-linecap="round"
+                        stroke="currentColor"
+                        fill="none"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      />
+                    </svg>
+                    <span
+                      class="absolute text-2xl font-extrabold text-slate-900"
+                      >80</span
+                    >
+                  </div>
+                  <p class="text-xs text-slate-500 mt-3 font-medium">
+                    Add 3 more skills to reach 100%
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: Skills, Experience, Education -->
+            <div class="lg:col-span-8 space-y-6">
+              <!-- Skills Block -->
+              <div
+                class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4"
+              >
+                <div class="flex items-center justify-between">
+                  <p
+                    class="text-[11px] font-bold tracking-wider text-slate-400 uppercase"
+                  >
+                    SKILLS
+                  </p>
+                  <button
+                    onclick="triggerToast('Add skill form opened')"
+                    class="text-xs font-semibold text-slate-600 hover:text-slate-900"
+                  >
+                    + Add skill
+                  </button>
+                </div>
+                <div class="flex flex-wrap gap-2 pt-1">
+                  <span
+                    class="bg-slate-100 text-slate-800 text-xs font-semibold px-3 py-1.5 rounded-full"
+                    >React</span
+                  >
+                  <span
+                    class="bg-slate-100 text-slate-800 text-xs font-semibold px-3 py-1.5 rounded-full"
+                    >JavaScript</span
+                  >
+                  <span
+                    class="bg-slate-100 text-slate-800 text-xs font-semibold px-3 py-1.5 rounded-full"
+                    >TypeScript</span
+                  >
+                  <span
+                    class="bg-slate-100 text-slate-800 text-xs font-semibold px-3 py-1.5 rounded-full"
+                    >Node.js</span
+                  >
+                  <span
+                    class="bg-slate-100 text-slate-800 text-xs font-semibold px-3 py-1.5 rounded-full"
+                    >HTML/CSS</span
+                  >
+                  <span
+                    class="bg-slate-100 text-slate-800 text-xs font-semibold px-3 py-1.5 rounded-full"
+                    >Git</span
+                  >
+                  <span
+                    class="bg-slate-100 text-slate-800 text-xs font-semibold px-3 py-1.5 rounded-full"
+                    >REST APIs</span
+                  >
+                  <span
+                    class="bg-slate-100 text-slate-800 text-xs font-semibold px-3 py-1.5 rounded-full"
+                    >MongoDB</span
+                  >
+                </div>
+              </div>
+
+              <!-- Experience Block -->
+              <div
+                class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-6"
+              >
+                <div class="flex items-center justify-between">
+                  <p
+                    class="text-[11px] font-bold tracking-wider text-slate-400 uppercase"
+                  >
+                    EXPERIENCE
+                  </p>
+                  <button
+                    onclick="triggerToast('Add experience modal')"
+                    class="text-xs font-semibold text-slate-600 hover:text-slate-900"
+                  >
+                    + Add experience
+                  </button>
+                </div>
+
+                <div class="space-y-6">
+                  <div class="flex items-start space-x-3">
+                    <div
+                      class="w-2.5 h-2.5 rounded-full bg-brand-blue mt-1.5 shrink-0"
+                    ></div>
+                    <div>
+                      <h3 class="font-bold text-slate-900 text-sm">
+                        Junior Developer — FreelanceHub
+                      </h3>
+                      <p class="text-xs text-slate-500 mt-0.5">
+                        Jan 2024 – Present • 5 months
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="flex items-start space-x-3">
+                    <div
+                      class="w-2.5 h-2.5 rounded-full bg-purple-500 mt-1.5 shrink-0"
+                    ></div>
+                    <div>
+                      <h3 class="font-bold text-slate-900 text-sm">
+                        Intern Developer — TechStart Abuja
+                      </h3>
+                      <p class="text-xs text-slate-500 mt-0.5">
+                        Jun 2023 – Dec 2023 • 7 months
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Education Block -->
+              <div
+                class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4"
+              >
+                <div class="flex items-center justify-between">
+                  <p
+                    class="text-[11px] font-bold tracking-wider text-slate-400 uppercase"
+                  >
+                    EDUCATION
+                  </p>
+                  <button
+                    onclick="triggerToast('Add education modal')"
+                    class="text-xs font-semibold text-slate-600 hover:text-slate-900"
+                  >
+                    + Add education
+                  </button>
+                </div>
+
+                <div class="flex items-start space-x-3">
+                  <div
+                    class="w-2.5 h-2.5 rounded-full bg-emerald-500 mt-1.5 shrink-0"
+                  ></div>
+                  <div>
+                    <h3 class="font-bold text-slate-900 text-sm">
+                      BSc Computer Science
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">
+                      University of Abuja • 2020 – 2024
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIEW 5: SETTINGS -->
+        <div
+          id="view-settings"
+          class="portal-view hidden space-y-6 max-w-3xl mx-auto"
+        >
+          <div>
+            <h1 class="text-2xl font-bold text-slate-900">Settings</h1>
+            <p class="text-slate-500 text-xs sm:text-sm mt-0.5">
+              Account & notification preferences
+            </p>
+          </div>
+
+          <!-- Account Information Form -->
+          <div
+            class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-100 shadow-sm space-y-6"
+          >
+            <h2 class="text-base font-bold text-slate-900">
+              Account information
+            </h2>
+
+            <form
+              onsubmit="
+                event.preventDefault();
+                triggerToast('Account information updated');
+              "
+              class="space-y-4"
+            >
+              <div class="space-y-1.5">
+                <label
+                  class="text-[11px] font-bold tracking-wider text-slate-400 uppercase"
+                  >FULL NAME</label
+                >
+                <input
+                  type="text"
+                  value="Adewale Stephen"
+                  class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-blue/30 focus:border-brand-blue"
+                />
+              </div>
+
+              <div class="space-y-1.5">
+                <label
+                  class="text-[11px] font-bold tracking-wider text-slate-400 uppercase"
+                  >EMAIL ADDRESS</label
+                >
+                <input
+                  type="email"
+                  value="adewale.stephen@email.com"
+                  class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-blue/30 focus:border-brand-blue"
+                />
+              </div>
+
+              <div class="space-y-1.5">
+                <label
+                  class="text-[11px] font-bold tracking-wider text-slate-400 uppercase"
+                  >PHONE NUMBER</label
+                >
+                <input
+                  type="tel"
+                  value="+234 801 234 5678"
+                  class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-blue/30 focus:border-brand-blue"
+                />
+              </div>
+
+              <div class="flex justify-end pt-2">
+                <button
+                  type="submit"
+                  class="bg-brand-blue hover:bg-brand-hover text-white font-semibold text-xs px-6 py-3 rounded-xl transition shadow-sm"
+                >
+                  Save changes
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Notifications Form -->
+          <div
+            class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-100 shadow-sm space-y-6"
+          >
+            <h2 class="text-base font-bold text-slate-900">Notifications</h2>
+
+            <div class="space-y-6">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="font-bold text-slate-900 text-sm">
+                    Email notifications
+                  </h3>
+                  <p class="text-xs text-slate-500 mt-0.5">
+                    Receive updates on application status changes
+                  </p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" checked class="sr-only peer" />
+                  <div
+                    class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-blue"
+                  ></div>
+                </label>
+              </div>
+
+              <div
+                class="flex items-center justify-between pt-4 border-t border-slate-100"
+              >
+                <div>
+                  <h3 class="font-bold text-slate-900 text-sm">Job alerts</h3>
+                  <p class="text-xs text-slate-500 mt-0.5">
+                    Get notified when new matching jobs are posted
+                  </p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" checked class="sr-only peer" />
+                  <div
+                    class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-blue"
+                  ></div>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIEW 6: APPLY FOR JOB -->
+        <div
+          id="view-apply"
+          class="portal-view hidden space-y-6 max-w-3xl mx-auto"
+        >
+          <button
+            onclick="switchView('browse')"
+            class="text-xs font-semibold text-brand-blue hover:underline flex items-center space-x-1"
+          >
+            <i class="fa-solid fa-arrow-left text-[10px]"></i>
+            <span>Back to job</span>
+          </button>
+
+          <div
+            class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-100 shadow-sm space-y-6"
+          >
+            <div>
+              <h1
+                id="apply-job-title"
+                class="text-2xl font-bold text-slate-900"
+              >
+                Apply for Senior Frontend Engineer
+              </h1>
+              <p
+                id="apply-job-company"
+                class="text-slate-500 text-xs sm:text-sm mt-0.5"
+              >
+                TechCorp Ghana Ltd • 92% match
+              </p>
+            </div>
+
+            <!-- Upload Box -->
+            <div class="space-y-2">
+              <label
+                class="text-[11px] font-bold tracking-wider text-slate-400 uppercase"
+                >YOUR CV</label
+              >
+              <div
+                class="border-2 border-dashed border-slate-200 hover:border-brand-blue rounded-2xl p-8 text-center flex flex-col items-center justify-center space-y-2 cursor-pointer bg-slate-50/50 transition"
+                onclick="triggerToast('CV Uploaded successfully')"
+              >
+                <i class="fa-solid fa-arrow-up text-slate-300 text-xl"></i>
+                <p class="font-bold text-slate-800 text-sm">Upload your CV</p>
+                <p class="text-xs text-slate-400">PDF, DOCX — max 5MB</p>
+              </div>
+            </div>
+
+            <!-- AI Analysis Notice Banner -->
+            <div
+              class="bg-emerald-50/80 border border-emerald-200/80 rounded-2xl p-4 flex items-start space-x-3"
+            >
+              <i
+                class="fa-solid fa-sparkles text-emerald-600 text-sm mt-0.5"
+              ></i>
+              <div>
+                <h4 class="font-bold text-emerald-900 text-xs sm:text-sm">
+                  AI will analyze your CV
+                </h4>
+                <p class="text-xs text-emerald-700/90 mt-0.5">
+                  Your CV will be automatically parsed and matched against job
+                  requirements. You'll receive a match score within minutes.
+                </p>
+              </div>
+            </div>
+
+            <!-- Cover Letter Textarea -->
+            <div class="space-y-2">
+              <label
+                class="text-[11px] font-bold tracking-wider text-slate-400 uppercase"
+                >COVER LETTER (OPTIONAL)</label
+              >
+              <textarea
+                rows="4"
+                placeholder="Tell the recruiter why you're a great fit for this role..."
+                class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-blue/30 focus:border-brand-blue resize-none"
+              ></textarea>
+            </div>
+
+            <!-- What Happens Next Section -->
+            <div
+              class="bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-3"
+            >
+              <p
+                class="text-[11px] font-bold tracking-wider text-slate-400 uppercase"
+              >
+                WHAT HAPPENS NEXT
+              </p>
+              <ol class="text-xs text-slate-600 space-y-1.5 list-decimal pl-4">
+                <li>Your CV will be analyzed by AI</li>
+                <li>You may be invited to take a skill assessment</li>
+                <li>Recruiters will review your profile and match score</li>
+                <li>You'll be notified of your application status</li>
+              </ol>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center justify-between pt-2">
+              <button
+                onclick="switchView('browse')"
+                class="border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs px-6 py-3 rounded-xl transition"
+              >
+                Cancel
+              </button>
+              <button
+                onclick="submitJobApplication()"
+                class="bg-brand-blue hover:bg-brand-hover text-white font-semibold text-xs px-6 py-3 rounded-xl transition shadow-sm flex items-center space-x-2"
+              >
+                <span>Submit application</span>
+                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+      <!-- Mobile bottom navigation -->
+      <nav
+        class="md:hidden fixed bottom-0 inset-x-0 z-40 bg-navy-900/95 backdrop-blur border-t border-slate-800 safe-bottom"
+      >
+        <div class="flex items-stretch max-w-lg mx-auto">
+          <button
+            onclick="switchView('dashboard')"
+            data-view="dashboard"
+            data-portal="seeker"
+            class="mnav-item flex-1 flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[10px] font-semibold text-slate-400 transition-colors"
+          >
+            <span
+              class="mnav-ico w-12 h-7 rounded-full flex items-center justify-center transition-colors"
+              ><i class="fa-solid fa-border-all text-[15px]"></i
+            ></span>
+            <span>Home</span>
+          </button>
+          <button
+            onclick="switchView('browse')"
+            data-view="browse"
+            data-portal="seeker"
+            class="mnav-item flex-1 flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[10px] font-semibold text-slate-400 transition-colors"
+          >
+            <span
+              class="mnav-ico w-12 h-7 rounded-full flex items-center justify-center transition-colors"
+              ><i class="fa-regular fa-compass text-[15px]"></i
+            ></span>
+            <span>Jobs</span>
+          </button>
+          <button
+            onclick="switchView('applications')"
+            data-view="applications"
+            data-portal="seeker"
+            class="mnav-item flex-1 flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[10px] font-semibold text-slate-400 transition-colors"
+          >
+            <span
+              class="mnav-ico w-12 h-7 rounded-full flex items-center justify-center transition-colors"
+              ><i class="fa-regular fa-paper-plane text-[15px]"></i
+            ></span>
+            <span>Applied</span>
+          </button>
+          <button
+            onclick="switchView('profile')"
+            data-view="profile"
+            data-portal="seeker"
+            class="mnav-item flex-1 flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[10px] font-semibold text-slate-400 transition-colors"
+          >
+            <span
+              class="mnav-ico w-12 h-7 rounded-full flex items-center justify-center transition-colors"
+              ><i class="fa-regular fa-user text-[15px]"></i
+            ></span>
+            <span>Profile</span>
+          </button>
+          <button
+            onclick="switchView('settings')"
+            data-view="settings"
+            data-portal="seeker"
+            class="mnav-item flex-1 flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[10px] font-semibold text-slate-400 transition-colors"
+          >
+            <span
+              class="mnav-ico w-12 h-7 rounded-full flex items-center justify-center transition-colors"
+              ><i class="fa-solid fa-gear text-[15px]"></i
+            ></span>
+            <span>Settings</span>
+          </button>
+        </div>
+      </nav>
+    </div>
+
+    <!-- NEW JOB MODAL (Matching Screenshot 2) -->
+    <div
+      id="modal-new-job"
+      class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden"
+    >
+      <div
+        class="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 space-y-6 shadow-2xl"
+      >
+        <div
+          class="flex items-center justify-between border-b border-slate-100 pb-4"
+        >
+          <h3 class="font-bold text-slate-900 text-lg">
+            Create new job listing
+          </h3>
+          <button
+            onclick="closeModal('modal-new-job')"
+            class="text-slate-400 hover:text-slate-600"
+          >
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+
+        <form
+          onsubmit="
+            event.preventDefault();
+            closeModal('modal-new-job');
+            triggerToast('New job posted successfully!');
+          "
+          class="space-y-4"
+        >
+          <div>
+            <label
+              class="text-[11px] font-bold tracking-wider text-slate-400 uppercase"
+              >JOB TITLE</label
+            >
+            <input
+              type="text"
+              required
+              placeholder="e.g. Senior Backend Engineer"
+              class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm mt-1 focus:ring-2 focus:ring-brand-blue/30 focus:outline-none"
+            />
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label
+                class="text-[11px] font-bold tracking-wider text-slate-400 uppercase"
+                >DEPARTMENT</label
+              >
+              <input
+                type="text"
+                placeholder="Engineering"
+                class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm mt-1 focus:ring-2 focus:ring-brand-blue/30 focus:outline-none"
+              />
+            </div>
+            <div>
+              <label
+                class="text-[11px] font-bold tracking-wider text-slate-400 uppercase"
+                >WORK TYPE</label
+              >
+              <select
+                class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm mt-1 focus:ring-2 focus:ring-brand-blue/30 focus:outline-none"
+              >
+                <option>Remote</option>
+                <option>Hybrid</option>
+                <option>On-site</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label
+              class="text-[11px] font-bold tracking-wider text-slate-400 uppercase"
+              >REQUIREMENTS & SKILLS</label
+            >
+            <textarea
+              rows="3"
+              placeholder="List key requirements (e.g., React, Node.js, GraphQL)..."
+              class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm mt-1 focus:ring-2 focus:ring-brand-blue/30 focus:outline-none resize-none"
+            ></textarea>
+          </div>
+
+          <div class="flex items-center justify-end space-x-3 pt-2">
+            <button
+              type="button"
+              onclick="closeModal('modal-new-job')"
+              class="px-5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="px-5 py-2.5 rounded-xl bg-brand-blue hover:bg-brand-hover text-xs font-bold text-white shadow-sm"
+            >
+              Publish job
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- PRICING MODAL (Matching Screenshots 4 & 5) -->
+    <div
+      id="modal-pricing"
+      class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden overflow-y-auto"
+    >
+      <div
+        class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 space-y-6 shadow-2xl my-8 max-h-[90vh] overflow-y-auto custom-scrollbar"
+      >
+        <div
+          class="flex items-center justify-between border-b border-slate-100 pb-4"
+        >
+          <div>
+            <h3 class="font-extrabold text-slate-900 text-xl">
+              Recruiter Plans & Credits
+            </h3>
+            <p class="text-xs text-slate-500 mt-0.5">
+              Scale your AI-driven hiring with flexible credit packs
+            </p>
+          </div>
+          <button
+            onclick="closeModal('modal-pricing')"
+            class="text-slate-400 hover:text-slate-600"
+          >
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+
+        <!-- Tier Cards Grid (Pic 4 & 5) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Starter Card -->
+          <div
+            class="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4 flex flex-col justify-between"
+          >
+            <div class="space-y-3">
+              <span
+                class="text-xs font-extrabold text-slate-500 uppercase tracking-wider"
+                >Starter</span
+              >
+              <div class="flex items-baseline space-x-1">
+                <span class="text-3xl font-black text-slate-900">₦25,000</span>
+                <span class="text-xs text-slate-500 font-medium">/ pack</span>
+              </div>
+              <p class="text-xs text-slate-600">
+                Ideal for small teams with occasional hiring needs.
+              </p>
+
+              <ul
+                class="space-y-2 text-xs text-slate-700 pt-2 border-t border-slate-200"
+              >
+                <li class="flex items-center space-x-2">
+                  <i class="fa-solid fa-check text-emerald-500 text-xs"></i>
+                  <span>50 CV AI Screenings</span>
+                </li>
+                <li class="flex items-center space-x-2">
+                  <i class="fa-solid fa-check text-emerald-500 text-xs"></i>
+                  <span>2 Active Job Listings</span>
+                </li>
+                <li class="flex items-center space-x-2">
+                  <i class="fa-solid fa-check text-emerald-500 text-xs"></i>
+                  <span>Basic Candidate Analytics</span>
+                </li>
+              </ul>
+            </div>
+
+            <button
+              onclick="
+                triggerToast('Redirecting to checkout...');
+                closeModal('modal-pricing');
+              "
+              class="w-full bg-white border border-slate-300 hover:bg-slate-100 text-slate-800 text-xs font-bold py-3 rounded-xl transition"
+            >
+              Buy Starter Pack
+            </button>
+          </div>
+
+          <!-- Growth Card (Featured) -->
+          <div
+            class="bg-navy-900 text-white p-6 rounded-2xl border-2 border-brand-blue space-y-4 flex flex-col justify-between relative shadow-lg"
+          >
+            <div
+              class="absolute -top-3 right-6 bg-brand-orange text-slate-900 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider"
+            >
+              POPULAR
+            </div>
+
+            <div class="space-y-3">
+              <span
+                class="text-xs font-extrabold text-brand-orange uppercase tracking-wider"
+                >Growth Pro</span
+              >
+              <div class="flex items-baseline space-x-1">
+                <span class="text-3xl font-black text-white">₦75,000</span>
+                <span class="text-xs text-slate-400 font-medium">/ pack</span>
+              </div>
+              <p class="text-xs text-slate-300">
+                Perfect for growing companies hiring regularly.
+              </p>
+
+              <ul
+                class="space-y-2 text-xs text-slate-200 pt-2 border-t border-slate-800"
+              >
+                <li class="flex items-center space-x-2">
+                  <i class="fa-solid fa-check text-brand-orange text-xs"></i>
+                  <span>250 CV AI Screenings</span>
+                </li>
+                <li class="flex items-center space-x-2">
+                  <i class="fa-solid fa-check text-brand-orange text-xs"></i>
+                  <span>10 Active Job Listings</span>
+                </li>
+                <li class="flex items-center space-x-2">
+                  <i class="fa-solid fa-check text-brand-orange text-xs"></i>
+                  <span>Custom Assessment Creation</span>
+                </li>
+                <li class="flex items-center space-x-2">
+                  <i class="fa-solid fa-check text-brand-orange text-xs"></i>
+                  <span>Priority Candidate Shortlisting</span>
+                </li>
+              </ul>
+            </div>
+
+            <button
+              onclick="
+                triggerToast('Redirecting to checkout...');
+                closeModal('modal-pricing');
+              "
+              class="w-full bg-brand-blue hover:bg-brand-hover text-white text-xs font-bold py-3 rounded-xl shadow-md transition"
+            >
+              Buy Growth Pack
+            </button>
+          </div>
+
+          <!-- Enterprise Card -->
+          <div
+            class="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4 flex flex-col justify-between"
+          >
+            <div class="space-y-3">
+              <span
+                class="text-xs font-extrabold text-slate-500 uppercase tracking-wider"
+                >Enterprise</span
+              >
+              <div class="flex items-baseline space-x-1">
+                <span class="text-3xl font-black text-slate-900">Custom</span>
+              </div>
+              <p class="text-xs text-slate-600">
+                For enterprise agencies needing unlimited scale.
+              </p>
+
+              <ul
+                class="space-y-2 text-xs text-slate-700 pt-2 border-t border-slate-200"
+              >
+                <li class="flex items-center space-x-2">
+                  <i class="fa-solid fa-check text-emerald-500 text-xs"></i>
+                  <span>Unlimited AI CV Parsing</span>
+                </li>
+                <li class="flex items-center space-x-2">
+                  <i class="fa-solid fa-check text-emerald-500 text-xs"></i>
+                  <span>Dedicated Account Manager</span>
+                </li>
+                <li class="flex items-center space-x-2">
+                  <i class="fa-solid fa-check text-emerald-500 text-xs"></i>
+                  <span>ATS Integration & API Access</span>
+                </li>
+              </ul>
+            </div>
+
+            <button
+              onclick="
+                triggerToast('Sales team notified');
+                closeModal('modal-pricing');
+              "
+              class="w-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold py-3 rounded-xl transition"
+            >
+              Contact Sales
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification Banner -->
+    <div
+      id="toast"
+      class="fixed bottom-24 md:bottom-6 right-4 md:right-6 transform translate-y-20 opacity-0 transition-all duration-300 z-50 bg-slate-900 text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-2xl flex items-center space-x-2"
+    >
+      <i class="fa-solid fa-circle-check text-emerald-400"></i>
+      <span id="toast-msg">Action processed</span>
+    </div>
+
+    <script>
+      function toggleAuthRole(role) {
+        window.appState.userType = role;
+        const btnSeeker = document.getElementById("tab-jobseeker");
+        const btnRecruiter = document.getElementById("tab-recruiter");
+        const statsSeeker = document.getElementById("auth-stats-seeker");
+        const statsRecruiter = document.getElementById("auth-stats-recruiter");
+
+        if (role === "jobseeker") {
+          btnSeeker.className =
+            "flex-1 py-2.5 rounded-lg text-sm font-semibold bg-brand-blue text-white shadow-sm transition-all";
+          btnRecruiter.className =
+            "flex-1 py-2.5 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 transition-all";
+          statsSeeker.classList.remove("hidden");
+          statsRecruiter.classList.add("hidden");
+        } else {
+          btnRecruiter.className =
+            "flex-1 py-2.5 rounded-lg text-sm font-semibold bg-brand-blue text-white shadow-sm transition-all";
+          btnSeeker.className =
+            "flex-1 py-2.5 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 transition-all";
+          statsRecruiter.classList.remove("hidden");
+          statsSeeker.classList.add("hidden");
+        }
+      }
+
+      function handleSignIn() {
+        const recruiterTab = document.getElementById("tab-recruiter");
+        const isRecruiter = recruiterTab.className.includes("bg-brand-blue");
+        window.appState.userType = isRecruiter ? "recruiter" : "jobseeker";
+        if (window.appState.userType === "recruiter") {
+          switchView("recruiter-dashboard");
+          triggerToast("Welcome back, Recruiter!");
+        } else {
+          switchView("dashboard");
+          triggerToast("Welcome back, Adewale!");
+        }
+      }
+
+      // ---- Job Seeker helpers ----
+      function openApplyModal(title) {
+        document.getElementById("apply-job-title").innerText =
+          "Apply for " + title;
+        switchView("apply", title);
+      }
+
+      function submitJobApplication() {
+        triggerToast("Application submitted successfully!");
+        setTimeout(() => {
+          switchView("applications");
+        }, 1000);
+      }
+
+      function filterApps(filter) {
+        document.querySelectorAll(".app-tab-btn").forEach((btn) => {
+          btn.className =
+            "app-tab-btn px-4 py-2 rounded-full text-xs font-semibold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 shrink-0";
+        });
+        const activeBtn = document.getElementById("tab-app-" + filter);
+        if (activeBtn) {
+          activeBtn.className =
+            "app-tab-btn px-4 py-2 rounded-full text-xs font-bold bg-brand-blue text-white shadow-sm shrink-0";
+        }
+        triggerToast("Filtered applications by " + filter.replace("-", " "));
+      }
+
+      window.onload = function () {
+        toggleAuthRole("jobseeker");
+        switchView("login");
+      };
+    </script>
+  </body>
+</html>
